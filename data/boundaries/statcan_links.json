@@ -1,0 +1,17 @@
+{
+"preamble":"This json lists the 'links' to ArcGIS shape (.shp) files from Stats Canada as described in https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-2016-eng.cfm",
+"links":{
+    "provinces":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lpr_000b16a_e.zip",
+    "provinces_digital":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lpr_000a16a_e.zip",
+    "federal_electoral_districts_2013_representation_order":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lfed000b16a_e.zip",
+    "economic_regions":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/ler_000b16a_e.zip",
+    "census_divisions":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lcd_000b16a_e.zip",
+    "population_centres":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lpc_000b16a_e.zip",
+    "population_ecumene":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lecu000e16a_e.zip",
+    "dissemination_areas":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lda_000b16a_e.zip",
+    "dissemination_blocks": "https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/ldb_000b16a_e.zip",
+    "census_subdivisions":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lcsd000b16a_e.zip",
+    "designated_places":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/ldpl000b16a_e.zip",
+    "lakes_and_rivers_polygons":"https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/2016/lhy_000c16a_e.zip"
+}
+}
