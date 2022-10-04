@@ -9,9 +9,10 @@ DA_OVERLAY_DIR = DATA_DIRECTORY / 'boundary_overlays'
 DA_OVERLAY_DIR.mkdir(exist_ok=True)
 
 files = [
+    ('population_centres', 'popctrs'),
     ('dissemination_areas', 'das'),
     ('census_subdivisions', 'subdivs'),
-    ('population_centres', 'popctrs'),
+    ('census_divisions', 'divs')
 ]
 
 def save_overlay(statcan_boundary, short_name):
