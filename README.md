@@ -50,7 +50,7 @@ Getting Started Instructions
 Either create a virtual or conda environt with the required python packages, including the aws cli. The AWS command line interface
 is needed to easily download the Ookla open data using:
 ```bash
-aws s3 sync --no-sign-request s3://ookla-open-data/ ./data/ookla-raw
+aws s3 sync --no-sign-request s3://ookla-open-data/shapefiles ./data/ookla-raw
 ```
 
 
