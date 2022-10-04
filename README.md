@@ -47,11 +47,32 @@ You can regenerate similar on *nix systems using:
 Getting Started Instructions 
 ==============================
 
-Either create a virtual or conda environt with the required python packages, including the aws cli. The AWS command line interface
+Data Download/Processing
+---------
+
+Install the AWS CLI using (these instructions)[https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html]. 
+The AWS command line interface
 is needed to easily download the Ookla open data using:
 ```bash
 aws s3 sync --no-sign-request s3://ookla-open-data/shapefiles ./data/ookla-raw
 ```
+
+After downloading the data, some somewhat long processing needs to be done. First, the global ookla tile information 
+needs to be filtered down to just Canada (otherwise the data is far too large to manipulate). This is done with 
+the `process_raw_ookla_faster.py` script. 
+
+Subsequently, geometric "overlays" for the ookla tiles and the Statistics Canada boundary files need to be 
+calculated to determine which area(s) the tiles should represent when merging with census data or comparing to 
+other StatCan references. This can be done with the `create_overalys.py` script. These will take several hours to 
+complete. 
+
+Both can be run in sequence from this directory as:
+```bash
+python scripts/data/process_raw_ookla_faster.py
+python scripts/data/create_overalys.py
+```
+
+The defined modiles/functions in the `src/datasets/loading` directory are designed to download necessary StatCan files as needed.
 
 
 

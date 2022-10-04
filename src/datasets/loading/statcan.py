@@ -68,6 +68,7 @@ HEXAGON_SHAPEFILE = DATA_DIRECTORY / 'Map_Data_Shapefile' / 'Data_Hex_Donnees.SH
 MAP_DATA_URL = 'https://www.ic.gc.ca/eic/site/720.nsf/vwapj/Map_Data_Shapefile.zip/$file/Map_Data_Shapefile.zip'
 
 def download_hexagons():
+    #TODO
     pass
 
 @functools.cache
