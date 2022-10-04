@@ -1,5 +1,5 @@
 from src.config import DATA_DIRECTORY
-from src.datasets import statcan, ookla
+from src.datasets.loading import statcan, ookla
 from src.datasets.overlays import overlay
 
 
@@ -17,7 +17,11 @@ files = [
 
 def save_overlay(statcan_boundary, short_name):
     output_shapefile = DA_OVERLAY_DIR / f'tile_{short_name}_overlay'
-    
+    if output_shapefile.exists():
+        print(f"File exists, skipping {output_shapefile}")
+        return 
+    print(f"Processing {statcan_boundary}")
+
     provinces = statcan.boundary('provinces_digital')
     tiles = ookla.canada_tiles().to_crs(provinces.crs)
     print(f"Calculating tile overlay with {statcan_boundary}")
