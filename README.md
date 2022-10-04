@@ -72,7 +72,7 @@ python scripts/data/process_raw_ookla_faster.py
 python scripts/data/create_overalys.py
 ```
 
-The defined modiles/functions in the `src/datasets/loading` directory are designed to download necessary StatCan files as needed.
+The defined modules/functions in the `src/datasets/loading` directory are designed to download necessary StatCan files as needed.
 
 
 
