@@ -1,9 +1,10 @@
-data-science-template
+Ookla Open Data and Statistics Canada Internet Analysis
 ==============================
 
-A starting place for data science projects. This readme should be updated  
-so that it is a starting point for the partners who will be receiving this 
-repository and associated work.
+Comparative analysis of the 
+[Statistics Canada National Broadband Internet Service Availability Map](https://www.ic.gc.ca/app/sitt/bbmap/hm.html?lang=eng) 
+and the speed test data made available through 
+[Ookla’s Open Data Initiative ](https://www.ookla.com/ookla-for-good/open-data).
 
 Project Organization
 ------------
@@ -46,11 +47,11 @@ You can regenerate similar on *nix systems using:
 Getting Started Instructions 
 ==============================
 
-How to start: ....
-
-<Fill in information for Receiving Company to be able to deploy, use, and/or reproduce results. >
-
-<Including, e.g., docker installation instructions, how to run or deploy the solution/program, and run any tests.>
+Either create a virtual or conda environt with the required python packages, including the aws cli. The AWS command line interface
+is needed to easily download the Ookla open data using:
+```bash
+aws s3 sync --no-sign-request s3://ookla-open-data/ ./data/ookla-raw
+```
 
 
 
