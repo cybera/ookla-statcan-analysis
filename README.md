@@ -48,13 +48,6 @@ Getting Started Instructions
 ==============================
 
 Instructions for setting up a python environment and downloading the AWS CLI are listed below.
-After installing both, a script called 'data_init.sh' can be run to download 
-the data and perform computations to postprocess the data. This can be run 
-as follows:
-```
-conda activate ookla-statcan
-bash data_init.sh
-```
 
 Python Environment
 ------------------
@@ -64,17 +57,44 @@ both a pip `requirements.txt` and a conda `environment.yml` are included in this
 It is recommended to use conda to install and create a python environment, as there 
 can be issues with ARM based CPUs (e.g. the MacBook Air M1 chips) or on Windows. 
 
-Instructions for installing conda are available on the [conda docs page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
+To install anaconda in your remote ubuntu virtual machine (ie. ISAIC or RAC) please follow [these instructions](https://linuxhint.com/install-anaconda-ubuntu-22-04/). When you get to the step to download the Anaconda installer script, use the following command to get the correct script:
+```
+curl --output anaconda.sh https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh
+```
+Option 2: Instructions for installing conda are available on the [conda docs page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
+
+
 After intalling either Anaconda or Miniconda, run the following:
 ```bash
 conda env create -f environment.yml
 conda activate ookla-statcan
 ```
 
+Install AWS CLI
+---------------
+Install the AWS CLI as shown below. 
+```
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+aws --version  # Check install
+```
+These commands are from [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). 
+
+Run Handy Script
+----------------
+With AWS and Anaconda/Miniconda installed, a script called 'data_init.sh' can be run to download 
+the data and perform computations to postprocess the data. This can be run 
+as follows. Ensure you are in the `ookla-statcan-analysis` directory then:
+```
+conda activate ookla-statcan
+bash data_init.sh
+```
+
 Data Download/Processing
 ------------------------
+If the script doesn't work, the steps are outlined below one by one.
 
-Install the AWS CLI using [these instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). 
 The AWS command line interface
 is needed to easily download the Ookla open data using:
 ```bash
