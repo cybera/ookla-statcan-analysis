@@ -5,10 +5,12 @@ import dotenv
 from pathlib import Path
 
 from datetime import datetime
+from src.config import DATA_DIRECTORY, OVERLAYS_DIR
 
-DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
-DA_OVERLAY_DIR = DATA_DIRECTORY / 'boundary_overlays'
-DA_OVERLAY_DIR.mkdir(exist_ok=True)
+# DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
+# DA_OVERLAY_DIR = DATA_DIRECTORY / 'boundary_overlays'
+# DA_OVELAY_DIR = OVERLAYS_DIR
+# DA_OVERLAY_DIR.mkdir(exist_ok=True)
 
 
 def overlay(left:gp.GeoDataFrame, right:gp.GeoDataFrame, crs=None):

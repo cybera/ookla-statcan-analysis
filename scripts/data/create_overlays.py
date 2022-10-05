@@ -1,11 +1,11 @@
-from src.config import DATA_DIRECTORY
 from src.datasets.loading import statcan, ookla
 from src.datasets.overlays import overlay
 
-
 from datetime import datetime
 
-DA_OVERLAY_DIR = DATA_DIRECTORY / 'boundary_overlays'
+from src.config import DATA_DIRECTORY, OVERLAYS_DIR
+
+DA_OVERLAY_DIR = OVERLAYS_DIR # DATA_DIRECTORY / 'boundary_overlays'
 DA_OVERLAY_DIR.mkdir(exist_ok=True)
 
 files = [

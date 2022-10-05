@@ -15,7 +15,8 @@ import zipfile
 
 from pathlib import Path
 
-DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
+from src.config import DATA_DIRECTORY
+# DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
 
 
 ### StatCan Boundary files

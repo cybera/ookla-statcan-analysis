@@ -11,8 +11,9 @@ import logging
 
 from pathlib import Path
 
-DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
+from src.config import DATA_DIRECTORY
 
+#DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
 #all_ookla_geometry_tiles = list(CANADA_TILES_DIR.glob('./**/ookla-*.shp'))
 
 def canada_tiles():

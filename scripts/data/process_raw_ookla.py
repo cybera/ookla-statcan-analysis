@@ -9,7 +9,7 @@ import glob
 import re
 import datetime
 
-import datasets.loading.statcan as statcan
+import src.datasets.loading.statcan as statcan
 
 OoklaPerformanceData = namedtuple('OoklaPerformanceData', ['path','type','year','quarter'])
 
