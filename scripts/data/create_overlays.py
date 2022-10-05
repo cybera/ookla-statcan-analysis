@@ -1,3 +1,6 @@
+import sys
+
+from traitlets import default
 from src.datasets.loading import statcan, ookla
 from src.datasets.overlays import overlay
 
@@ -8,7 +11,7 @@ from src.config import DATA_DIRECTORY, OVERLAYS_DIR
 DA_OVERLAY_DIR = OVERLAYS_DIR # DATA_DIRECTORY / 'boundary_overlays'
 DA_OVERLAY_DIR.mkdir(exist_ok=True)
 
-files = [
+default_files = [
     ('population_centres', 'popctrs'),
     ('dissemination_areas', 'das'),
     ('census_subdivisions', 'subdivs'),
@@ -36,7 +39,20 @@ def save_overlay(statcan_boundary, short_name):
     print(f"Ended at {end}")
     print(f"Elapsed duration {end-start}")
 
-for name, short_name in files:
-    save_overlay(name, short_name)
-    print()
-    print()
+
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        files = default_files
+        print("No name, shortname pairs provided as args, using defaults.")
+    else:
+        files = list(zip(sys.argv[1::2],sys.argv[2::2]))
+
+    print("Creating overlays using the following boundary names and short names:")
+    import pprint
+    pprint.pprint(files)
+
+    for name, short_name in files:
+        save_overlay(name, short_name)
+        print()
+
+
