@@ -1,0 +1,9 @@
+numpy
+pandas
+geopandas
+requests
+python-dotenv
+scikit-learn
+matplotlib
+notebook
+jupyterlab

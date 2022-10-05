@@ -47,10 +47,25 @@ You can regenerate similar on *nix systems using:
 Getting Started Instructions 
 ==============================
 
-Data Download/Processing
----------
+Python Environment
+------------------
 
-Install the AWS CLI using (these instructions)[https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html]. 
+This project uses the python programming language. To install the required python packages 
+both a pip `requirements.txt` and a conda `environment.yml` are included in this repository.
+It is recommended to use conda to install and create a python environment, as there 
+can be issues with ARM based CPUs (e.g. the MacBook Air M1 chips) or on Windows. 
+
+Instructions for installing conda are available on the [conda docs page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
+After intalling either Anaconda or Miniconda, run the following:
+```bash
+conda env create -f environment.yml
+conda activate ookla-statcan
+```
+
+Data Download/Processing
+------------------------
+
+Install the AWS CLI using [these instructions](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). 
 The AWS command line interface
 is needed to easily download the Ookla open data using:
 ```bash
@@ -78,7 +93,8 @@ The defined modiles/functions in the `src/datasets/loading` directory are design
 
 Docker Setup
 --------------------
-
+To be completed...
+<!-- 
 ### Installation
 Before proceeding further, please install [Docker](https://www.docker.com/) following the instructions provided in the [link here](https://docs.docker.com/get-docker/) for your choice of operating system. 
 
@@ -109,5 +125,5 @@ docker logs <container-id>
 To view the list of all the containers and get the container id of the JupyterLab, run 
 ```
 docker ps -a
-```
+``` -->
 
