@@ -33,10 +33,12 @@ import re
 import datetime
 
 import src.datasets.loading.statcan as statcan
+from src.config import DATA_DIRECTORY
 
 OoklaPerformanceData = namedtuple('OoklaPerformanceData', ['path','type','year','quarter'])
 
-DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
+#DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
+
 RAW_TILES_DIR = DATA_DIRECTORY / 'ookla-raw'
 CANADA_TILES_DIR = DATA_DIRECTORY / 'ookla-canada-tiles'
 
