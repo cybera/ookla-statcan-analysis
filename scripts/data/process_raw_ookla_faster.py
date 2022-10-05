@@ -51,6 +51,7 @@ def as_namedtuple(path):
 
 raw_files = list(RAW_TILES_DIR.glob('**/*.zip'))
 raw_files = [as_namedtuple(p) for p in raw_files]
+raw_files = sorted(raw_files)
 
 if len(raw_files) == 0:
     raise ValueError(f"Couldn't locate Ookla shapefiles at {RAW_TILES_DIR}")
@@ -117,6 +118,9 @@ for raw_file in raw_files:
     end = datetime.datetime.now()
     print(f"Time Elapsed {end-start}")
 
+if len(results) == 0:
+    print("No new tile files found, exiting without updating all-tile-labels.")
+    quit()
 
 print("Saving tile labels...")
 tile_labels.to_csv(CANADA_TILES_DIR / 'all-tile-labels.csv', index=False)
