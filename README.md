@@ -47,6 +47,15 @@ You can regenerate similar on *nix systems using:
 Getting Started Instructions 
 ==============================
 
+Instructions for setting up a python environment and downloading the AWS CLI are listed below.
+After installing both, a script called 'data_init.sh' can be run to download 
+the data and perform computations to postprocess the data. This can be run 
+as follows:
+```
+conda activate ookla-statcan
+bash data_init.sh
+```
+
 Python Environment
 ------------------
 
@@ -78,7 +87,7 @@ the `process_raw_ookla_faster.py` script.
 
 Subsequently, geometric "overlays" for the ookla tiles and the Statistics Canada boundary files need to be 
 calculated to determine which area(s) the tiles should represent when merging with census data or comparing to 
-other StatCan references. This can be done with the `create_overalys.py` script. These will take several hours to 
+other StatCan references. This can be done with the `create_overlays.py` script. These will take several hours to 
 complete. 
 
 Both can be run in sequence from this directory as:
