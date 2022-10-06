@@ -11,7 +11,7 @@ export PYTHONPATH="${PYTHONPATH}:./src"
 
 # #
 echo 'Downloading Ookla data from AWS'
-aws s3 sync --no-sign-request s3://ookla-open-data/shapefiles ./data/ookla-raw 
+aws s3 sync --no-sign-request --region=us-west-2 s3://ookla-open-data/shapefiles ./data/ookla-raw 
 
 echo 'Filtering global Ookla tiles to Canada only'
 #conda run -n ookla-statcan scripts/data/process_raw_ookla_faster.py
