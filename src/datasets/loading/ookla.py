@@ -16,16 +16,16 @@ from src.config import DATA_DIRECTORY
 #DATA_DIRECTORY = Path(dotenv.dotenv_values()['DATA_DIRECTORY'])
 #all_ookla_geometry_tiles = list(CANADA_TILES_DIR.glob('./**/ookla-*.shp'))
 
-def canada_tiles():
+def canada_tiles(rows=None):
     canada_tile_geometry_file = DATA_DIRECTORY / 'ookla-canada-tiles' / 'canada-tiles'
     if canada_tile_geometry_file.exists():
-        return gp.read_file(canada_tile_geometry_file)
+        return gp.read_file(canada_tile_geometry_file, rows=rows)
         
     labeled_tiles = DATA_DIRECTORY / 'ookla-canada-tiles' / 'all-tile-labels'
-    labeled_tiles = gp.read_file(labeled_tiles)
+    labeled_tiles = gp.read_file(labeled_tiles, rows=rows)
     
-    only_canada = labeled_tiles.loc[lambda s:s.in_canada==1].copy()
-    only_canada['quadkey'] = only_canada['quadkey'].astype(int)
+    #only_canada = labeled_tiles.loc[lambda s:s.in_canada==1].copy()
+    #only_canada['quadkey'] = only_canada['quadkey'].astype(int)
     only_canada = only_canada[['quadkey','geometry']]
     only_canada.to_file(canada_tile_geometry_file,driver="ESRI Shapefile")
     return only_canada
