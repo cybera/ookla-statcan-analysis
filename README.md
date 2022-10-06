@@ -91,6 +91,14 @@ conda activate ookla-statcan
 bash data_init.sh
 ```
 
+The docker container can also be used to download and process the data. To do so 
+first start the docker container using `docker compose up -d` then 
+find the docker CONTAINER ID using `docker ps`, then use the following command,
+replacing the angle brackets and CONTAINER ID with the ID of the running container:
+```
+docker exec -it <CONTAINER ID> bash data_init.sh
+```
+
 Data Download/Processing
 ------------------------
 If the script doesn't work, the steps are outlined below one by one.
@@ -98,7 +106,7 @@ If the script doesn't work, the steps are outlined below one by one.
 The AWS command line interface
 is needed to easily download the Ookla open data using:
 ```bash
-aws s3 sync --no-sign-request s3://ookla-open-data/shapefiles ./data/ookla-raw
+aws s3 sync --no-sign-request --region=us-west-2 s3://ookla-open-data/shapefiles ./data/ookla-raw
 ```
 
 After downloading the data, some somewhat long processing needs to be done. First, the global ookla tile information 
