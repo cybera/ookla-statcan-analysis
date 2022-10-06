@@ -98,7 +98,7 @@ If the script doesn't work, the steps are outlined below one by one.
 The AWS command line interface
 is needed to easily download the Ookla open data using:
 ```bash
-aws s3 sync --no-sign-request s3://ookla-open-data/shapefiles ./data/ookla-raw
+aws s3 sync --no-sign-request --region=us-west-2 s3://ookla-open-data/shapefiles ./data/ookla-raw
 ```
 
 After downloading the data, some somewhat long processing needs to be done. First, the global ookla tile information 
