@@ -1,4 +1,6 @@
 ###
+set -euxo pipefail
+
 
 echo 'I tried my besst. I hope this downloads all the things and processes them into data files.'
 echo 'Requires an environment where "python" is the python3 command with installed libs'

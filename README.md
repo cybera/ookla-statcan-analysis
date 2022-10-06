@@ -91,6 +91,14 @@ conda activate ookla-statcan
 bash data_init.sh
 ```
 
+The docker container can also be used to download and process the data. To do so 
+first start the docker container using `docker compose up -d` then 
+find the docker CONTAINER ID using `docker ps`, then use the following command,
+replacing the angle brackets and CONTAINER ID with the ID of the running container:
+```
+docker exec -it <CONTAINER ID> bash data_init.sh
+```
+
 Data Download/Processing
 ------------------------
 If the script doesn't work, the steps are outlined below one by one.
