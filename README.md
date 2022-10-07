@@ -1,4 +1,4 @@
-Ookla Open Data and Statistics Canada Internet Analysis
+Ookla Open Data and Statistics Canada Internet Analysis(CBS)
 ==============================
 
 Comparative analysis of the 
