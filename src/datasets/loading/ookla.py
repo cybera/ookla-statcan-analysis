@@ -24,7 +24,7 @@ def canada_tiles(rows=None):
     labeled_tiles = DATA_DIRECTORY / 'ookla-canada-tiles' / 'all-tile-labels'
     labeled_tiles = gp.read_file(labeled_tiles, rows=rows)
     
-    #only_canada = labeled_tiles.loc[lambda s:s.in_canada==1].copy()
+    only_canada = labeled_tiles.loc[lambda s:s.in_canada==1]
     #only_canada['quadkey'] = only_canada['quadkey'].astype(int)
     only_canada = only_canada[['quadkey','geometry']]
     only_canada.to_file(canada_tile_geometry_file,driver="ESRI Shapefile")
