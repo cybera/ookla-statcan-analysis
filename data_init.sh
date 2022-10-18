@@ -7,7 +7,7 @@ echo 'Requires an environment where "python" is the python3 command with install
 echo 'And aws s3 must be installed'
 echo ''
 
-export PYTHONPATH="${PYTHONPATH}:./src"
+export PYTHONPATH="${PYTHONPATH-.}:./src"
 
 # #
 echo 'Downloading Ookla data from AWS'
