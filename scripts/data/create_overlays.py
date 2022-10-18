@@ -1,6 +1,7 @@
 import sys
 
-from traitlets import default
+import pandas as pd
+
 from src.datasets.loading import statcan, ookla
 from src.datasets.overlays import overlay
 
@@ -44,8 +45,14 @@ def save_overlay(statcan_boundary, short_name):
         },
         inplace=True,
     )
-    # da_tile_overlay['quadkey'] = da_tile_overlay.astype(str)
-    # da_tile_overlay.info()
+    # da_tile_overlay["quadkey"] = da_tile_overlay.astype(str)
+    da_tile_overlay["quadkey"] = (
+        da_tile_overlay["quadkey"]
+        .astype("object")
+        .apply(lambda s: s if pd.isna(s) else None)
+    )
+
+    da_tile_overlay.info()
 
     da_tile_overlay.to_file(output_shapefile, driver="ESRI Shapefile")
     end = datetime.now()
