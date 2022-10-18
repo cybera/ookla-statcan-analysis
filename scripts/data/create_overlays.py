@@ -53,7 +53,7 @@ def save_overlay(statcan_boundary, short_name):
         .apply(lambda s: s if s != "<NA>" else None)
     )
 
-    tile_overlay.info()
+    # tile_overlay.info()
 
     tile_overlay.to_file(output_shapefile, driver="ESRI Shapefile")
     end = datetime.now()
