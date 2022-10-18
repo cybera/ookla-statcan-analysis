@@ -34,9 +34,9 @@ def save_overlay(statcan_boundary, short_name):
 
     start = datetime.now()
     print(f"Started at {start}")
-    da_tile_overlay = overlay(das, tiles)
+    tile_overlay = overlay(das, tiles)
     print("done overlays, cleaning up")
-    da_tile_overlay.rename(
+    tile_overlay.rename(
         columns={
             "right_frac": "tile_frac",
             "right_area": "tile_area",
@@ -46,11 +46,16 @@ def save_overlay(statcan_boundary, short_name):
         inplace=True,
     )
     # da_tile_overlay["quadkey"] = da_tile_overlay.astype(str)
-    da_tile_overlay["quadkey"] = da_tile_overlay["quadkey"].astype("Int64").astype(str)
+    tile_overlay["quadkey"] = (
+        tile_overlay["quadkey"]
+        .astype("Int64")
+        .astype(str)
+        .apply(lambda s: s if s != "<NA>" else None)
+    )
 
-    da_tile_overlay.info()
+    tile_overlay.info()
 
-    da_tile_overlay.to_file(output_shapefile, driver="ESRI Shapefile")
+    tile_overlay.to_file(output_shapefile, driver="ESRI Shapefile")
     end = datetime.now()
     print(f"Ended at {end}")
     print(f"Elapsed duration {end-start}")
