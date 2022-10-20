@@ -34,6 +34,10 @@ import datetime
 
 import src.datasets.loading.statcan as statcan
 from src.config import DATA_DIRECTORY
+import warnings
+
+# warnings.filterwarnings("ignore", "SettingWithCopyWarning*")
+pd.options.mode.chained_assignment = None
 
 OoklaPerformanceData = namedtuple(
     "OoklaPerformanceData", ["path", "type", "year", "quarter"]
