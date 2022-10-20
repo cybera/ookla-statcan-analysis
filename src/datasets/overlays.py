@@ -16,6 +16,8 @@ from src.config import DATA_DIRECTORY, OVERLAYS_DIR
 def overlay(left: gp.GeoDataFrame, right: gp.GeoDataFrame, crs=None):
     if crs:
         left = left.to_crs(crs)
+    else:
+        left = left.copy()
     right = right.to_crs(left.crs)
     left["left_area"] = left.area
     right["right_area"] = right.area
