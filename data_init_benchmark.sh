@@ -25,7 +25,7 @@ echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 ##
 SECONDS=0
 now=$(date)
-echo "Filtering to Canda starting at at  ${now}"
+echo "Filtering to Canada starting at at  ${now}"
 echo "Filtering global Ookla tiles to Canada only"
 python scripts/data/process_raw_ookla_faster.py
 now=$(date)
@@ -38,7 +38,7 @@ echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 SECONDS=0
 echo "Generating complex geometry overlays"
 python scripts/data/create_overlays.py population_centres pops
-python scripts/data/create_overlays.py dissemination_areas das
+# python scripts/data/create_overlays.py dissemination_areas das
 overlay_duration=SECONDS
 overlay_duration=dl_duration
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."

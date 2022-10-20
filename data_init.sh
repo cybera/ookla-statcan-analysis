@@ -24,7 +24,7 @@ echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 ##
 SECONDS=0
 now=$(date)
-echo "Filtering to Canda starting at at  ${now}"
+echo "Filtering to Canada starting at at  ${now}"
 echo "Filtering global Ookla tiles to Canada only"
 python scripts/data/process_raw_ookla_faster.py
 now=$(date)
