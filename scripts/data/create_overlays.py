@@ -39,8 +39,10 @@ def save_overlay(statcan_boundary, short_name):
     tile_overlay = overlay(das, tiles)
     print("done overlays, cleaning up")
     ## reduce precision to prevent saving error/warning savingto shapefile
-    tile_overlay["left_area"] = tile_overlay["left_area"].astype("float32")
-    tile_overlay["right_area"] = tile_overlay["left_area"].astype("float32")
+    # tile_overlay["left_area"] = tile_overlay["left_area"].astype("float32")
+    # tile_overlay["right_area"] = tile_overlay["left_area"].astype("float32")
+    tile_overlay["left_area"] /= 1e6
+    tile_overlay["right_area"] /= 1e6
     tile_overlay.rename(
         columns={
             "right_frac": "tile_frac",
