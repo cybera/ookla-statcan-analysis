@@ -2,6 +2,7 @@
 ### including shapefiles
 ### including census data?
 
+import os
 import dotenv
 import pandas as pd
 import geopandas as gp
@@ -13,6 +14,8 @@ import logging
 import zipfile
 
 from pathlib import Path
+
+import warnings
 
 from src.config import DATA_DIRECTORY
 
@@ -67,29 +70,117 @@ def download_boundaries():
         download_boundary(name)
 
 
+def _donwload_unzip_check(url, dir, fname=None):
+    dir.mkdir(exist_ok=True)
+    r = requests.get(url)
+
+    tempfile = dir / "downloaded_file.zip"
+
+    with open(tempfile, "wb") as file:
+        file.write(r.content)
+    with open(tempfile, "rb") as file:
+        zipfile.ZipFile(tempfile).extractall(dir)
+    os.remove(tempfile)
+    if fname is not None and not (dir / fname).exists():
+        warnings.warn(f"Expected to find {fname} in zip archive, but it is missing.")
+
+
 ### Hexagon data
-HEXAGON_SHAPEFILE = DATA_DIRECTORY / "Map_Data_Shapefile" / "Data_Hex_Donnees.SHP"
 MAP_DATA_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/Map_Data_Shapefile.zip/$file/Map_Data_Shapefile.zip"
+HEXAGON_SHAPEFILE_DIR = DATA_DIRECTORY / "Map_Data_Shapefile"
+HEXAGON_SHAPEFILE = HEXAGON_SHAPEFILE_DIR / "Data_Hex_Donnees.SHP"
+
+PHH_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_ShapeFile.zip/$file/PHH_Data_ShapeFile.zip"
+PHH_DIR = DATA_DIRECTORY / "PHH"
+
+
+PHH_URL_SINGLECSV = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_CSV.zip/$file/PHH_Data_CSV.zip"
+PHH_SPEEDS_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/NBD_PHH_Speeds.zip/$file/NBD_PHH_Speeds.zip"
 
 
 def download_hexagons():
-    # TODO
-    pass
+    _donwload_unzip_check(MAP_DATA_URL, HEXAGON_SHAPEFILE_DIR, HEXAGON_SHAPEFILE.name)
+
+
+def download_phh():
+    _donwload_unzip_check(PHH_URL, PHH_DIR)
+    _donwload_unzip_check(PHH_URL_SINGLECSV, PHH_DIR)
+    _donwload_unzip_check(PHH_SPEEDS_URL, PHH_DIR)
 
 
 @functools.cache
 def hexagons():
-    return gp.read_file(HEXAGON_SHAPEFILE)
-
-
-HEXAGON_POPULATIONS_FILE = (
-    DATA_DIRECTORY / "NBD_PHH_Speeds" / "PHH_Speeds_Current-PHH_Vitesses_Actuelles.csv"
-)
+    if not HEXAGON_SHAPEFILE.exists() and AUTO_DOWNLOAD:
+        download_hexagons()
+    gdf = gp.read_file(HEXAGON_SHAPEFILE)
+    del gdf["LAYER"]
+    del gdf["BORDER_STY"]
+    del gdf["BORDER_COL"]
+    del gdf["FILL_STYLE"]
+    del gdf["CLOSED"]
+    del gdf["BORDER_WID"]
+    chopped_cols = {
+        "SumPop_201": "SumPop_2016_SommePop",
+        "SumURD_201": "SumURD_2016_SommeRH",
+        "SumTD_2016": "SumTD_2016_SommeTL",
+        "Avail_5_1_": "Avail_5_1_75PctPlus_Dispo",
+        "Avail_50_1": "Avail_50_10_Gradient_Dispo",
+    }
+    return gdf.rename(columns=chopped_cols)
 
 
 @functools.cache
-def hexagon_populations():
-    return pd.read_csv(HEXAGON_POPULATIONS_FILE)
+def phh():
+    csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
+    if len(csv_files) == 0 and AUTO_DOWNLOAD:
+        download_phh()
+        csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
+    return pd.concat([pd.read_csv(f) for f in csv_files], axis=0).reset_index(drop=True)
+
+
+@functools.cache
+def phh_shapefiles():
+    shapefiles = list(PHH_DIR.glob("./PHH_DATA_Shapefile/*.shp"))
+    if len(shapefiles) == 0 and AUTO_DOWNLOAD:
+        download_phh()
+        shapefiles = list(PHH_DIR.glob("./PHH_DATA_Shapefile/*.shp"))
+
+    gdf = pd.concat([gp.read_file(f) for f in shapefiles], axis=0).reset_index(
+        drop=True
+    )
+    del gdf["LAYER"]
+    del gdf["GM_TYPE"]
+    chopped_cols = {
+        "TDwell2016": "TDwell2016_TLog2016",
+        "URDwell206": "URDwell2016_RH2016",
+        "DBUID_Idid": "DBUID_Ididu",
+        "HEXUID_IdU": "HEXUID_IdUHEX",
+        "Pruid_Prid": "Pruid_Pridu",
+    }
+    return gdf.rename(columns=chopped_cols)
+
+
+@functools.cache
+def phh_hex_pop():
+    grps = phh().groupby("HEXUID_IdUHEX")
+    agg = pd.concat(
+        [
+            grps["Pop2016"].sum(),
+            grps["TDwell2016_TLog2016"].sum(),
+            grps["URDwell2016_RH2016"].sum(),
+            grps["PHH_ID"].count().rename("PHH_Count"),
+            grps["Type"]
+            .apply(lambda df: df.value_counts().iloc[0])
+            .rename("Common_Type"),
+        ],
+        axis=1,
+    )
+    return agg
+
+
+@functools.cache
+def hexagons_phh():
+    return hexagons().merge(phh_hex_pop(), left_on="HEXuid_HEX", right_index=True)
 
 
 ### Demographic data
@@ -100,12 +191,12 @@ FILE_URL = "https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/dt-td/Comp
 
 def download_pop_data():
     POP_DIR.mkdir(exist_ok=True)
-    url = FILE_URL
-    r = requests.get(url)
+    r = requests.get(FILE_URL)
     with open(POP_DIR / "zip_download.zip", "wb") as file:
         file.write(r.content)
     with open(POP_DIR / "zip_download.zip", "rb") as file:
         zipfile.ZipFile(file).extractall(POP_DIR)
+    os.remove(POP_DIR / "zip_download.zip")
 
 
 @functools.cache
@@ -150,3 +241,15 @@ def census_subdivisions_populations():
 
 def census_divisions_populations():
     return _total_pops("CDUID", 2)
+
+
+if __name__ == "__main__":
+    # print("Downloading all statcan related files")
+    # download_boundaries()
+    # download_pop_data()
+
+    print("Downloading hexagon files")
+    download_hexagons()
+
+    print("Downloading PHH data")
+    download_phh()
