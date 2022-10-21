@@ -14,7 +14,8 @@ SECONDS=0
 echo "Downloading Ookla data from AWS"
 now=$(date)
 echo "S3 Download start at  ${now}"
-aws s3 sync --no-sign-request --no-progress --region=us-west-2 s3://ookla-open-data/shapefiles ./data/ookla-raw 
+## restrict shapefiles for download to be faster.
+aws s3 sync --no-sign-request --no-progress --region=us-west-2 --exclude "*" --include "*/type=fixed/year=2019/quarter=[12]/*" s3://ookla-open-data/shapefiles ./data/ookla-raw 
 now=$(date)
 dl_duration=$SECONDS
 echo "S3 Download completed at  ${now}"
