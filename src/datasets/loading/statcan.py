@@ -2,7 +2,7 @@
 ### including shapefiles
 ### including census data?
 
-import os
+import os, re
 import dotenv
 import pandas as pd
 import geopandas as gp
@@ -86,11 +86,21 @@ def _donwload_unzip_check(url, dir, fname=None):
 
 
 ### Hexagon data
-MAP_DATA_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/Map_Data_Shapefile.zip/$file/Map_Data_Shapefile.zip"
-HEXAGON_SHAPEFILE_DIR = DATA_DIRECTORY / "Map_Data_Shapefile"
-HEXAGON_SHAPEFILE = HEXAGON_SHAPEFILE_DIR / "Data_Hex_Donnees.SHP"
+# MAP_DATA_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/Map_Data_Shapefile.zip/$file/Map_Data_Shapefile.zip" ## no longer hosted by Gov.
+MAP_DATA_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/Map_Data_CSV.zip/$file/Map_Data_CSV.zip"
+# MAP_DATA_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/Map_Data_MapInfo.zip/$file/Map_Data_MapInfo.zip"
+HEX_URLS = [
+    "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/CHX_EXO_geo.TAB/$file/CHX_EXO_geo.TAB",
+    "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/CHX_EXO_geo.MAP/$file/CHX_EXO_geo.MAP",
+    "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/CHX_EXO_geo.IND/$file/CHX_EXO_geo.IND",
+    "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/CHX_EXO_geo.ID/$file/CHX_EXO_geo.ID",
+    "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/CHX_EXO_geo.DAT/$file/CHX_EXO_geo.DAT",
+]
+HEXAGON_MAP_DIR = DATA_DIRECTORY / "CRTC_NBD_Map_Data"
+HEXAGON_SHAPEFILE = HEXAGON_MAP_DIR / "CHX_EXO_geo.TAB"
 
-PHH_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_ShapeFile.zip/$file/PHH_Data_ShapeFile.zip"
+# PHH_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_ShapeFile.zip/$file/PHH_Data_ShapeFile.zip"
+PHH_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_MapInfo.zip/$file/PHH_Data_MapInfo.zip"
 PHH_DIR = DATA_DIRECTORY / "PHH"
 
 
@@ -98,14 +108,31 @@ PHH_URL_SINGLECSV = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_CSV.zi
 PHH_SPEEDS_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/NBD_PHH_Speeds.zip/$file/NBD_PHH_Speeds.zip"
 
 
+def download_map_data():
+    _donwload_unzip_check(MAP_DATA_URL, HEXAGON_MAP_DIR)
+
+
 def download_hexagons():
-    _donwload_unzip_check(MAP_DATA_URL, HEXAGON_SHAPEFILE_DIR, HEXAGON_SHAPEFILE.name)
+    for url in HEX_URLS:
+        HEXAGON_MAP_DIR.mkdir(exist_ok=True)
+        r = requests.get(url)
+
+        fname = ""
+        if "Content-Disposition" in r.headers.keys():
+            fname = re.findall("filename=(.+)", r.headers["Content-Disposition"])[0]
+        else:
+            fname = url.split("/")[-1]
+
+        tabfile = HEXAGON_MAP_DIR / fname
+
+        with open(tabfile, "wb") as file:
+            file.write(r.content)
 
 
 def download_phh():
     _donwload_unzip_check(PHH_URL, PHH_DIR)
     _donwload_unzip_check(PHH_URL_SINGLECSV, PHH_DIR)
-    _donwload_unzip_check(PHH_SPEEDS_URL, PHH_DIR)
+    _donwload_unzip_check(PHH_SPEEDS_URL, PHH_DIR / "CRTC_Speed_Data")
 
 
 @functools.cache
@@ -113,20 +140,7 @@ def hexagons():
     if not HEXAGON_SHAPEFILE.exists() and AUTO_DOWNLOAD:
         download_hexagons()
     gdf = gp.read_file(HEXAGON_SHAPEFILE)
-    del gdf["LAYER"]
-    del gdf["BORDER_STY"]
-    del gdf["BORDER_COL"]
-    del gdf["FILL_STYLE"]
-    del gdf["CLOSED"]
-    del gdf["BORDER_WID"]
-    chopped_cols = {
-        "SumPop_201": "SumPop_2016_SommePop",
-        "SumURD_201": "SumURD_2016_SommeRH",
-        "SumTD_2016": "SumTD_2016_SommeTL",
-        "Avail_5_1_": "Avail_5_1_75PctPlus_Dispo",
-        "Avail_50_1": "Avail_50_10_Gradient_Dispo",
-    }
-    return gdf.rename(columns=chopped_cols)
+    return gdf
 
 
 @functools.cache
@@ -140,24 +154,15 @@ def phh():
 
 @functools.cache
 def phh_shapefiles():
-    shapefiles = list(PHH_DIR.glob("./PHH_DATA_Shapefile/*.shp"))
+    shapefiles = list(PHH_DIR.glob("./PHH_DATA_MapInfo/*.TAB"))
     if len(shapefiles) == 0 and AUTO_DOWNLOAD:
         download_phh()
-        shapefiles = list(PHH_DIR.glob("./PHH_DATA_Shapefile/*.shp"))
+        shapefiles = list(PHH_DIR.glob("./PHH_DATA_MapInfo/*.TAB"))
 
     gdf = pd.concat([gp.read_file(f) for f in shapefiles], axis=0).reset_index(
         drop=True
     )
-    del gdf["LAYER"]
-    del gdf["GM_TYPE"]
-    chopped_cols = {
-        "TDwell2016": "TDwell2016_TLog2016",
-        "URDwell206": "URDwell2016_RH2016",
-        "DBUID_Idid": "DBUID_Ididu",
-        "HEXUID_IdU": "HEXUID_IdUHEX",
-        "Pruid_Prid": "Pruid_Pridu",
-    }
-    return gdf.rename(columns=chopped_cols)
+    return gdf
 
 
 @functools.cache
@@ -247,8 +252,10 @@ if __name__ == "__main__":
     # print("Downloading all statcan related files")
     # download_boundaries()
     # download_pop_data()
+    print("Downloading map data (CSV)")
+    download_map_data()
 
-    print("Downloading hexagon files")
+    print("Downloading hexagon files (MapFile)")
     download_hexagons()
 
     print("Downloading PHH data")
