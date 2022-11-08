@@ -99,6 +99,8 @@ HEX_URLS = [
 HEXAGON_MAP_DIR = DATA_DIRECTORY / "CRTC_NBD_Map_Data"
 HEXAGON_SHAPEFILE = HEXAGON_MAP_DIR / "CHX_EXO_geo.TAB"
 
+HEXAGON_SPEED_INFO_FILE = DATA_DIRECTORY / "CRTC_NBD_Map_Data" / "Data_Hex_Données.csv"
+
 # PHH_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_ShapeFile.zip/$file/PHH_Data_ShapeFile.zip"
 PHH_URL = "https://www.ic.gc.ca/eic/site/720.nsf/vwapj/PHH_Data_MapInfo.zip/$file/PHH_Data_MapInfo.zip"
 PHH_DIR = DATA_DIRECTORY / "PHH"
@@ -136,24 +138,23 @@ def download_phh():
 
 
 @functools.cache
-def hexagons():
+def _hexagons():
     if not HEXAGON_SHAPEFILE.exists() and AUTO_DOWNLOAD:
         download_hexagons()
     gdf = gp.read_file(HEXAGON_SHAPEFILE)
     return gdf
 
 
-@functools.cache
-def phh():
-    csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
-    if len(csv_files) == 0 and AUTO_DOWNLOAD:
-        download_phh()
-        csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
-    return pd.concat([pd.read_csv(f) for f in csv_files], axis=0).reset_index(drop=True)
+def hexagon_geometry():
+    return _hexagons().copy()
+
+
+def hexagon_data():
+    return pd.read_csv(HEXAGON_SPEED_INFO_FILE)
 
 
 @functools.cache
-def phh_shapefiles():
+def _phh_MapInfo():
     shapefiles = list(PHH_DIR.glob("./PHH_DATA_MapInfo/*.TAB"))
     if len(shapefiles) == 0 and AUTO_DOWNLOAD:
         download_phh()
@@ -165,9 +166,28 @@ def phh_shapefiles():
     return gdf
 
 
+def phh_geometry():
+    return _phh_MapInfo().copy()[["PHH_ID", "geometry"]]
+
+
+def phh_data():
+    df = pd.DataFrame(_phh_MapInfo().copy())
+    del df["geometry"]
+    return df
+
+
 @functools.cache
-def phh_hex_pop():
-    grps = phh().groupby("HEXUID_IdUHEX")
+def phh_csv_data():
+    csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
+    if len(csv_files) == 0 and AUTO_DOWNLOAD:
+        download_phh()
+        csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
+    return pd.concat([pd.read_csv(f) for f in csv_files], axis=0).reset_index(drop=True)
+
+
+@functools.cache
+def phh_hex_data():
+    grps = _phh_MapInfo().groupby("HEXUID_IdUHEX")
     agg = pd.concat(
         [
             grps["Pop2016"].sum(),
@@ -183,9 +203,9 @@ def phh_hex_pop():
     return agg
 
 
-@functools.cache
-def hexagons_phh():
-    return hexagons().merge(phh_hex_pop(), left_on="HEXuid_HEX", right_index=True)
+# @functools.cache
+# def hexagons_phh():
+#     return hexagons().merge(phh_hex_pop(), left_on="HEXuid_HEX", right_index=True)
 
 
 ### Demographic data
@@ -249,9 +269,13 @@ def census_divisions_populations():
 
 
 if __name__ == "__main__":
-    # print("Downloading all statcan related files")
-    # download_boundaries()
-    # download_pop_data()
+
+    print("Downloading all statcan census boundary files")
+    download_boundaries()
+
+    print("Downloading census population data")
+    download_pop_data()
+
     print("Downloading map data (CSV)")
     download_map_data()
 
