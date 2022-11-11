@@ -203,9 +203,12 @@ def phh_hex_data():
     return agg
 
 
-# @functools.cache
-# def hexagons_phh():
-#     return hexagons().merge(phh_hex_pop(), left_on="HEXuid_HEX", right_index=True)
+@functools.cache
+def hexagons_phh():
+    # return hexagons().merge(phh_hex_pop(), left_on="HEXuid_HEX", right_index=True)
+    return hexagon_data().merge(
+        phh_hex_data(), left_on="HEXuid_HEXidu", right_index=True
+    )
 
 
 ### Demographic data
