@@ -8,6 +8,7 @@ from src.datasets import overlays
 import statsmodels as sm
 import statsmodels.stats.weightstats
 from scipy.stats import lognorm
+import scipy.stats
 
 import functools
 
@@ -72,6 +73,7 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
     )
 
     grps = geom_labelled_tiles.groupby(geom_index)
+    ## calculate the obvious simple statistics
     aggs = pd.concat(
         [
             grps["avg_d_kbps"].mean(),
@@ -123,6 +125,36 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
             # grps["devices"].sum(),
             grps["devices"].mean().rename("ave_devices_per_tile"),
             grps["avg_d_kbps"].count().rename("num_tiles"),
+        ],
+        axis=1,
+    )
+
+    return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
+
+
+def add_50_10_stats(boundary_geom, tiles, geom_index):
+    unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
+
+    join_result = (
+        boundary_geom[[geom_index, "geometry"]]
+        .to_crs(unique_tiles.crs)
+        .sjoin(unique_tiles)
+    )
+
+    geom_labelled_tiles = tiles.merge(
+        join_result[["quadkey", geom_index]], on="quadkey", how="left"
+    )
+
+    grps = geom_labelled_tiles.groupby(geom_index)
+    ## calculate the obvious simple statistics
+    aggs = pd.concat(
+        [
+            grps["avg_d_kbps"]
+            .apply(lambda s: 100 - scipy.stats.percentileofscore(s, 50_000))
+            .rename("50_down_percentile"),
+            grps["avg_u_kbps"]
+            .apply(lambda s: 100 - scipy.stats.percentileofscore(s, 10_000))
+            .rename("10_up_percentile"),
         ],
         axis=1,
     )
