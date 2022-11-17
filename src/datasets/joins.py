@@ -42,6 +42,10 @@ def hexagons_popctrs_removed():
     rural_hexes = o[pd.isna(o.PCPUID)]
     city_hexes = o[~pd.isna(o.PCPUID)]
 
+    rural_hexes["HEXUID_PCPUID"] = rural_hexes["HEXUID_PCPUID"].str.replace(
+        "-XXXXXX", ""
+    )
+
     dissolved_cities = city_hexes.dissolve(
         by="PCPUID", aggfunc={"HEXuid_HEXidu": list}
     ).reset_index()
@@ -258,6 +262,19 @@ def add_logvar_stats(boundary_geom, tiles, geom_index):
 
 
 def add_phh_pop(boundary_geom, phh, geom_index):
+    phh = phh.loc[lambda s: s.Type != 8]  # remove PHH null points.
+
+    if "Combined_50_10_Combine" in phh:
+        phh["Pop2016_at_50_10_Combined"] = (
+            phh["Combined_50_10_Combine"] * phh["Pop2016"]
+        )
+        phh["TDwell2016_at_50_10_Combined"] = (
+            phh["Combined_50_10_Combine"] * phh["TDwell2016_TLog2016"]
+        )
+        phh["URDwell_at_50_10_Combined"] = (
+            phh["Combined_50_10_Combine"] * phh["URDwell2016_RH2016"]
+        )
+
     join_result = boundary_geom[[geom_index, "geometry"]].to_crs(phh.crs).sjoin(phh)
 
     grps = join_result.groupby(geom_index)
@@ -273,5 +290,29 @@ def add_phh_pop(boundary_geom, phh, geom_index):
         ],
         axis=1,
     )
+
+    if "Combined_50_10_Combine" in phh:
+        speed_aggs = pd.concat(
+            [
+                grps["Pop2016_at_50_10_Combined"].sum(),
+                grps["TDwell2016_at_50_10_Combined"].sum(),
+                grps["URDwell_at_50_10_Combined"].sum(),
+            ],
+            axis=1,
+        )
+
+        aggs = pd.concat([aggs, speed_aggs], axis=1)
+
+        print(aggs.head(2))
+        # # calculate percentages
+        # aggs["Pop_Avail_50_10"] = (
+        #     aggs["Pop2016_at_50_10_Combined"] / aggs["Pop2016"] * 100
+        # )
+        # aggs["TDwell_Avail_50_10"] = (
+        #     (aggs["TDwell2016_at_50_10_Combined"] / aggs["TDwell2016_TLog2016"] * 100),
+        # )
+        # aggs["URDwell_Avail_50_10"] = (
+        #     aggs["URDwell_at_50_10_Combined"] / aggs["URDwell2016_RH2016"] * 100
+        # )
 
     return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
