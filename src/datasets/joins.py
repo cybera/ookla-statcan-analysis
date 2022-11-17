@@ -285,7 +285,7 @@ def add_phh_pop(boundary_geom, phh, geom_index):
             grps["URDwell2016_RH2016"].sum(),
             grps["PHH_ID"].count().rename("PHH_Count"),
             grps["Type"]
-            .apply(lambda df: df.value_counts().iloc[0])
+            .apply(lambda df: df.value_counts().index[0])
             .rename("Common_Type"),
         ],
         axis=1,
@@ -303,16 +303,16 @@ def add_phh_pop(boundary_geom, phh, geom_index):
 
         aggs = pd.concat([aggs, speed_aggs], axis=1)
 
-        print(aggs.head(2))
-        # # calculate percentages
-        # aggs["Pop_Avail_50_10"] = (
-        #     aggs["Pop2016_at_50_10_Combined"] / aggs["Pop2016"] * 100
-        # )
-        # aggs["TDwell_Avail_50_10"] = (
-        #     (aggs["TDwell2016_at_50_10_Combined"] / aggs["TDwell2016_TLog2016"] * 100),
-        # )
-        # aggs["URDwell_Avail_50_10"] = (
-        #     aggs["URDwell_at_50_10_Combined"] / aggs["URDwell2016_RH2016"] * 100
-        # )
+        # calculate percentages
+        aggs["Pop_Avail_50_10"] = (
+            aggs["Pop2016_at_50_10_Combined"] / aggs["Pop2016"] * 100
+        )
+        aggs["TDwell_Avail_50_10"] = (
+            aggs["TDwell2016_at_50_10_Combined"] / aggs["TDwell2016_TLog2016"] * 100
+        )
+
+        aggs["URDwell_Avail_50_10"] = (
+            aggs["URDwell_at_50_10_Combined"] / aggs["URDwell2016_RH2016"] * 100
+        )
 
     return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
