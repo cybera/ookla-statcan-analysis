@@ -36,7 +36,7 @@ def hexagons_popctrs_overlay():
     return o
 
 
-def hexagons_popctrs_removed():
+def hexagons_popctrs_combined():
     o = hexagons_popctrs_overlay()
 
     rural_hexes = o[pd.isna(o.PCPUID)]
@@ -52,6 +52,35 @@ def hexagons_popctrs_removed():
     dissolved_cities["HEXUID_PCPUID"] = dissolved_cities["PCPUID"]
 
     return pd.concat([dissolved_cities, rural_hexes])
+
+
+def hexagons_small_popctrs_combined():
+    o = hexagons_popctrs_overlay()
+
+    popctrs = statcan.boundary("population_centres")
+
+    o = o.merge(popctrs[["PCPUID", "PCNAME", "PCCLASS"]], on="PCPUID", how="outer")
+
+    rural_hexes = o[pd.isna(o.PCPUID)]
+    city_hexes = o[~pd.isna(o.PCPUID)]
+
+    rural_hexes["HEXUID_PCPUID"] = rural_hexes["HEXUID_PCPUID"].str.replace(
+        "-XXXXXX", ""
+    )
+
+    dissolved_cities = (
+        city_hexes.loc[lambda s: s.PCCLASS != "4"]
+        .dissolve(
+            by="PCPUID",
+            aggfunc={"HEXuid_HEXidu": list, "PCNAME": "first", "PCCLASS": "first"},
+        )
+        .reset_index()
+    )
+    dissolved_cities["HEXUID_PCPUID"] = dissolved_cities["PCPUID"]
+
+    major_cities = city_hexes.loc[lambda s: s.PCCLASS == "4"]
+
+    return pd.concat([major_cities, dissolved_cities, rural_hexes])
 
 
 def add_simple_stats(boundary_geom, tiles, geom_index):
