@@ -195,6 +195,42 @@ def add_50_10_stats(boundary_geom, tiles, geom_index):
     return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
 
 
+def add_tile_info(boundary_geom, tiles, geom_index):
+    unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
+
+    join_result = (
+        boundary_geom[[geom_index, "geometry"]]
+        .to_crs(unique_tiles.crs)
+        .sjoin(unique_tiles)
+    )
+
+    geom_labelled_tiles = tiles.merge(
+        join_result[["quadkey", geom_index]], on="quadkey", how="left"
+    )
+
+    geom_labelled_tiles["year+quarter"] = geom_labelled_tiles[
+        ["year", "quarter"]
+    ].apply(tuple, axis=1)
+
+    grps = geom_labelled_tiles.groupby(geom_index)
+
+    max_year = grps["year+quarter"].max()
+    # max_year = max_year.year.astype(str) + " Q" + max_year.quarter.astype(str)
+    # max_year = max_year.apply(lambda s: s[0] + " Q" + s[1], axis=1)
+    max_year = max_year.rename("max_year")
+
+    min_year = grps["year+quarter"].min()
+    # min_year = min_year.year.astype(str) + " Q" + min_year.quarter.astype(str)
+    min_year = min_year.rename("min_year")
+
+    connections = grps["conn_type"].apply(set)
+    connections = connections.rename("connections")
+
+    aggs = pd.concat([min_year, max_year, connections], axis=1)
+
+    return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
+
+
 def add_logvar_stats(boundary_geom, tiles, geom_index):
     raise ValueError("Not implemented proplerly yet.")
     # TODO: remove stats from simple stat func
