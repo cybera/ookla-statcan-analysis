@@ -224,7 +224,7 @@ f"Economic region selected: {er_option}"
 st.markdown("""
 To help find locations on the map, it is possible to search for 
 an address or named location using the text bar below, which uses 
-Open Street Map. A table for the area searched is also displayed
+OpenStreetMap. A table for the area searched is also displayed
 after searching.
 """)
 addy_lookup = st.text_input("Address Search")
@@ -266,11 +266,13 @@ if pin_location:
 st_folium(map, key='main-map', returned_objects=[], height=800, width=700)
 
 st.write("Population Centres (excluding class 4 largest cities):")
-popctr_table = speed_data_subset.loc[lambda s:s.PCCLASS.isin(['2','3']), ['PCNAME','P50_d_Mbps','P50_u_Mbps','Pop2016','Pop_Avail_50_10','ookla_50_10_percentile']].sort_values(by='PCNAME').set_index("PCNAME")
+popctr_table = speed_data_subset.loc[lambda s:s.PCCLASS.isin(['2','3']), ['PCNAME','PCCLASS','P50_d_Mbps','P50_u_Mbps','Pop2016','Pop_Avail_50_10','ookla_50_10_percentile']].sort_values(by='PCNAME').set_index("PCNAME")
 popctr_table["Discrepancy"] = popctr_table["Pop_Avail_50_10"] - popctr_table["ookla_50_10_percentile"]
+popctr_table.rename(columns={"P50_d_Mbps":"Down Speed (Mbps)", "P50_u_Mbps":"Up Speed (Mbps)"}, inplace=True)
+popctr_table.rename(columns={"Pop_Avail_50_10":"StatCan Pop at 50/10 (%)", "ookla_50_10_percentile":"Ookla Pop at 50/10 (%)"}, inplace=True)
+
 st.dataframe(
-    popctr_table,
-    use_container_width=True,
+    popctr_table.style.format(precision=0, thousands=","),
     height=1000
     )
 
