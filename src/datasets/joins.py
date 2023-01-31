@@ -27,11 +27,16 @@ def hexagons_popctrs_overlay():
             "left_area": "pc_area",
         }
     )
-    # o["HEXPOPCTR_ID"] = o.apply(
-    #     lambda s: s.HEXuid_HEXidu + "-" + (str(s.PCPUID) if s.PCPUID else "XXXX"),
-    #     axis=1,
-    # )
+
+    #overlay generate some very narrow slices of empty areas,
+    #looks like its where small slivers of the cities overlap in between 
+    # hexagons where they don't 100% tesselate.
+    o  = o.dropna(subset=["HEXuid_HEXidu"])
+    
     o["HEXUID_PCPUID"] = o.HEXuid_HEXidu + "-" + o.PCPUID.fillna("XXXXXX").astype(str)
+
+    #take first two letters of Hex ID to generate province two letter alpha code
+    o["PRCODE"] = o["HEXuid_HEXidu"].apply(lambda s:s[0:2])
 
     return o
 
@@ -68,11 +73,13 @@ def hexagons_small_popctrs_combined():
         "-XXXXXX", ""
     )
 
+    # dissolving on PCPUID includes the province code so Lloydminster and other 
+    # multi-province cities aren't merged accross provincial borders.
     dissolved_cities = (
         city_hexes.loc[lambda s: s.PCCLASS != "4"]
         .dissolve(
             by="PCPUID",
-            aggfunc={"HEXuid_HEXidu": list, "PCNAME": "first", "PCCLASS": "first"},
+            aggfunc={"HEXuid_HEXidu": list, "PCNAME": "first", "PCCLASS": "first", "PRCODE":"first"},
         )
         .reset_index()
     )
