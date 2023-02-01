@@ -11,6 +11,7 @@ from scipy.stats import lognorm
 import scipy.stats
 
 import functools
+import warnings
 
 
 @functools.cache
@@ -89,12 +90,15 @@ def hexagons_small_popctrs_combined():
 
     return pd.concat([major_cities, dissolved_cities, rural_hexes])
 
-
-def add_simple_stats(boundary_geom, tiles, geom_index):
+def _tile_join(geom, tiles, geom_index):
+    if geom_index in tiles:
+        warnings.warn(f"Tiles already have labels matching {geom_index}, skipping labelling.")
+        return tiles
+    
     unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
 
     join_result = (
-        boundary_geom[[geom_index, "geometry"]]
+        geom[[geom_index, "geometry"]]
         .to_crs(unique_tiles.crs)
         .sjoin(unique_tiles)
     )
@@ -102,6 +106,11 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
     geom_labelled_tiles = tiles.merge(
         join_result[["quadkey", geom_index]], on="quadkey", how="left"
     )
+    
+    return geom_labelled_tiles
+
+def add_simple_stats(boundary_geom, tiles, geom_index):
+    geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
 
     unique_devices = (
         geom_labelled_tiles.groupby(["quadkey", geom_index])["devices"]
@@ -173,17 +182,7 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
 
 
 def add_50_10_stats(boundary_geom, tiles, geom_index):
-    unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
-
-    join_result = (
-        boundary_geom[[geom_index, "geometry"]]
-        .to_crs(unique_tiles.crs)
-        .sjoin(unique_tiles)
-    )
-
-    geom_labelled_tiles = tiles.merge(
-        join_result[["quadkey", geom_index]], on="quadkey", how="left"
-    )
+    geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
 
     grps = geom_labelled_tiles.groupby(geom_index)
     ## calculate the obvious simple statistics
@@ -203,17 +202,7 @@ def add_50_10_stats(boundary_geom, tiles, geom_index):
 
 
 def add_tile_info(boundary_geom, tiles, geom_index):
-    unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
-
-    join_result = (
-        boundary_geom[[geom_index, "geometry"]]
-        .to_crs(unique_tiles.crs)
-        .sjoin(unique_tiles)
-    )
-
-    geom_labelled_tiles = tiles.merge(
-        join_result[["quadkey", geom_index]], on="quadkey", how="left"
-    )
+    geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
 
     geom_labelled_tiles["year+quarter"] = geom_labelled_tiles[
         ["year", "quarter"]
