@@ -332,7 +332,14 @@ country-wide and for rural communities.
 )
 col1, col2 = st.columns(2)
 
-
+# ensure consistent legend/color labelling
+explicit_pie_colors = {
+    "StatCan_Pop_at_50_10": "blue",
+    "StatCan_Pop_below_50_10": "gray",
+    "Ookla_Pop_at_50_10": "blue",
+    "Ookla_Pop_below_50_10": "gray",
+    "Rural": "red",
+}
 with col1:
     fig = px.pie(
         for_pies.loc[
@@ -340,9 +347,12 @@ with col1:
         ].T.reset_index(),
         values="Total",
         names="index",
+        color="index",
         hole=0.6,
         height=180,
         title="StatCan 50/10",
+        color_discrete_map=explicit_pie_colors,
+        # category_orders=["StatCan_Pop_at_50_10", "StatCan_Pop_below_50_10"],
     )
     fig.update(layout_showlegend=False)
     fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
@@ -354,9 +364,12 @@ with col2:
         ].T.reset_index(),
         values="Total",
         names="index",
+        color="index",
         hole=0.6,
         height=180,
         title="Ookla 50/10",
+        color_discrete_map=explicit_pie_colors,
+        # category_orders=["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"],
     )
     fig.update(layout_showlegend=False)
     fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
@@ -371,9 +384,12 @@ with col1:
         ].T.reset_index(),
         values="Rural",
         names="index",
+        color="index",
         hole=0.6,
         height=180,
         title="StatCan Rural 50/10",
+        color_discrete_map=explicit_pie_colors,
+        # category_orders={"StatCan_Pop_at_50_10": "1", "StatCan_Pop_below_50_10": "2"},
     )
     fig.update(layout_showlegend=False)
     fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
@@ -385,9 +401,12 @@ with col2:
         ].T.reset_index(),
         values="Rural",
         names="index",
+        color="index",
         hole=0.6,
         height=180,
         title="Ookla Rural 50/10",
+        color_discrete_map=explicit_pie_colors,
+        category_orders={"index": ["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"]},
     )
     fig.update(layout_showlegend=False)
     fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
