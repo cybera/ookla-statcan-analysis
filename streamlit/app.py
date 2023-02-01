@@ -13,6 +13,9 @@ from OSMPythonTools.nominatim import Nominatim
 
 import plotly.express as px
 
+# memoize boundary loading function
+statcan.boundary = st.experimental_singleton(statcan.boundary)
+
 output_name = "LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg"
 output_dir = src.config.DATA_DIRECTORY / "processed" / "statistical_geometries"
 output_dir.mkdir(exist_ok=True)
@@ -72,35 +75,12 @@ def load_speed_data():
 
 speed_data = load_speed_data()
 
-# memoize boundary loading function
-statcan.boundary = st.experimental_singleton(statcan.boundary)
-# statcan.boundary("census_divisions")
 
 pr_names = list(statcan.boundary("provinces").loc[:, "PRNAME"].unique())
-# cd_names = statcan.boundary("census_divisions").loc[:, 'CDNAME'].unique()
 
 
 @st.experimental_memo
 def subset_region(prname, cdname="All", ername="All"):
-    # if cdname == "All" and ername == "All":
-    #     area = statcan.boundary("provinces").loc[lambda s: s.PRNAME == prname]
-    #     if len(area) > 1:
-    #         print(f"Was expecting exactly one area to match on {prname}")
-    #     return speed_data.sjoin(area, how="inner", predicate="intersects")
-    # elif ername != "All":
-    #     area = statcan.boundary("economic_regions").loc[
-    #         lambda s: (s.PRNAME == prname) & (s.ERNAME == ername)
-    #     ]
-    #     if len(area) != 1:
-    #         print(f"Was expecting exactly one area to match on {prname}, {ername}")
-    #     return speed_data.sjoin(area, how="inner", predicate="intersects")
-    # elif cdname != "All":
-    #     area = statcan.boundary("census_divisions").loc[
-    #         lambda s: (s.PRNAME == prname) & (s.CDNAME == cdname)
-    #     ]
-    #     if len(area) != 1:
-    #         print(f"Was expecting exactly one area to match on {prname}, {cdname}")
-    #     return speed_data.sjoin(area, how="inner", predicate="intersects")
     pruid = (
         statcan.boundary("provinces").loc[lambda s: s.PRNAME == prname, "PRUID"].iloc[0]
     )
@@ -134,38 +114,20 @@ def subset_region(prname, cdname="All", ername="All"):
 # speed_data needs to be first to preserve geometry in join result.
 
 
-def colorer(value):
-    if pd.isna(value):
-        return "gray"
-    elif value < 25:
-        return "red"
-    elif value < 50:
-        return "orange"
-    elif value < 75:
-        return "yellow"
-    elif value <= 100:
-        return "blue"
-    else:
-        return "black"
-
-
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import matplotlib as mpl
 
 ## there's some kind of weird bug interraction with the colormaps
 ## when there's nans that is only handled properly in geopandas
 ## when the cmap is a registered matplotlib colormap T_T :(
-cmap = ListedColormap(["red", "orange", "yellow", "blue"], name="wimsy")
+cmap = ListedColormap(["red", "orange", "yellow", "blue"], name="progress")
 mpl.colormaps.register(cmap, force=True)
-
 
 # @st.cache
 # def generate_map(gdf):
 # @st.experimental_memo
 def generate_map(prname, cdname="All", ername="All"):
     gdf = subset_region(prname, cdname, ername)
-    gdf = gdf.copy()
-    gdf["color"] = gdf["ookla_50_10_percentile"].apply(colorer)
     print("Generating map")
     map = gdf.loc[lambda s: s.Pop2016 > 0.0].explore(
         "ookla_50_10_percentile",
@@ -177,7 +139,7 @@ def generate_map(prname, cdname="All", ername="All"):
         #     vmax=100,
         #     index=[0, 1, 25, 50, 75, 100],
         # ),
-        cmap="wimsy",
+        cmap="progress",
         legend=True,
         tooltip=[
             "HEXUID_PCPUID",
@@ -338,81 +300,162 @@ explicit_pie_colors = {
     "StatCan_Pop_below_50_10": "gray",
     "Ookla_Pop_at_50_10": "blue",
     "Ookla_Pop_below_50_10": "gray",
-    "Rural": "red",
 }
-with col1:
+
+
+def prog_pies(labels, total_or_rural, title):
     fig = px.pie(
-        for_pies.loc[
-            :, ["StatCan_Pop_at_50_10", "StatCan_Pop_below_50_10"]
-        ].T.reset_index(),
-        values="Total",
+        for_pies.loc[:, labels].T.reset_index(),
+        values=total_or_rural,
         names="index",
         color="index",
         hole=0.6,
         height=180,
-        title="StatCan 50/10",
+        title=title,
         color_discrete_map=explicit_pie_colors,
-        # category_orders=["StatCan_Pop_at_50_10", "StatCan_Pop_below_50_10"],
+        category_orders={"index": labels},
     )
     fig.update(layout_showlegend=False)
     fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
+
+    return fig
+
+
+with col1:
+    fig = prog_pies(
+        ["StatCan_Pop_at_50_10", "StatCan_Pop_below_50_10"], "Total", "StatCan 50/10"
+    )
     st.plotly_chart(fig, use_container_width=True)
 with col2:
-    fig = px.pie(
-        for_pies.loc[
-            :, ["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"]
-        ].T.reset_index(),
-        values="Total",
-        names="index",
-        color="index",
-        hole=0.6,
-        height=180,
-        title="Ookla 50/10",
-        color_discrete_map=explicit_pie_colors,
-        # category_orders=["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"],
+    fig = prog_pies(
+        ["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"], "Total", "Ookla 50/10"
     )
-    fig.update(layout_showlegend=False)
-    fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
     st.plotly_chart(fig, use_container_width=True)
 
-# st.subheader("Rural 50/10 Access")
 col1, col2 = st.columns(2)
 with col1:
-    fig = px.pie(
-        for_pies.loc[
-            :, ["StatCan_Pop_at_50_10", "StatCan_Pop_below_50_10"]
-        ].T.reset_index(),
-        values="Rural",
-        names="index",
-        color="index",
-        hole=0.6,
-        height=180,
-        title="StatCan Rural 50/10",
-        color_discrete_map=explicit_pie_colors,
-        # category_orders={"StatCan_Pop_at_50_10": "1", "StatCan_Pop_below_50_10": "2"},
+    fig = prog_pies(
+        ["StatCan_Pop_at_50_10", "StatCan_Pop_below_50_10"],
+        "Rural",
+        "StatCan Rural 50/10",
     )
-    fig.update(layout_showlegend=False)
-    fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
     st.plotly_chart(fig, use_container_width=True)
 with col2:
-    fig = px.pie(
-        for_pies.loc[
-            :, ["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"]
-        ].T.reset_index(),
-        values="Rural",
-        names="index",
-        color="index",
-        hole=0.6,
-        height=180,
-        title="Ookla Rural 50/10",
-        color_discrete_map=explicit_pie_colors,
-        category_orders={"index": ["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"]},
+    fig = prog_pies(
+        ["Ookla_Pop_at_50_10", "Ookla_Pop_below_50_10"], "Rural", "Ookla Rural 50/10"
     )
-    fig.update(layout_showlegend=False)
-    fig.update_layout(margin=dict(l=10, r=10, t=50, b=0))
     st.plotly_chart(fig, use_container_width=True)
 
 #####
+
+pr_stats = speed_data.groupby(["PRCODE", "is_rural"])[
+    "Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"
+].sum()
+pr_stats = pd.DataFrame(pr_stats).reset_index()
+pr_stats["Pop2016_below_50_10_Combined"] = (
+    pr_stats["Pop2016"] - pr_stats["Pop2016_at_50_10_Combined"]
+)
+pr_stats["Ookla_Pop_below_50_10"] = pr_stats["Pop2016"] - pr_stats["Ookla_Pop_at_50_10"]
+pr_stats["StatCan_Percentage"] = (
+    pr_stats["Pop2016_at_50_10_Combined"] / pr_stats["Pop2016"] * 100
+)
+pr_stats["Ookla_Percentage"] = (
+    pr_stats["Ookla_Pop_at_50_10"] / pr_stats["Pop2016"] * 100
+)
+# pr_stats
+
+import plotly.graph_objects as go
+
+# fig = go.Figure(data=[go.bar(name="Urban", x="")])
+
+
+largest_rural_pr, largest_rural_pop = (
+    pr_stats.loc[lambda s: s.is_rural]
+    .sort_values(by=["Ookla_Pop_below_50_10"], ascending=False)
+    .iloc[0]
+    .loc[["PRCODE", "Ookla_Pop_below_50_10"]]
+)
+lowest_percent_pr, lowest_percent = (
+    pr_stats.loc[lambda s: s.is_rural]
+    .sort_values(by=["Ookla_Percentage"], ascending=True)
+    .iloc[0]
+    .loc[["PRCODE", "Ookla_Percentage"]]
+)
+st.markdown(
+    """
+## Progress by Province
+By province, the percentage of people living in areas 
+with internet speeds above the 50/10 access level 
+varies. For example, {} has the largest 
+rural population of {:,.0f} lacking access to internet speeds at the 50/10 level.
+While, {} has the lowest percentage coverage for rural areas 
+with {:.0f}% of the population at the target level.
+""".format(
+        largest_rural_pr, largest_rural_pop, lowest_percent_pr, lowest_percent
+    )
+)
+
+fig = px.bar(
+    pr_stats,
+    y="Ookla_Percentage",
+    x="PRCODE",
+    color="is_rural",
+    barmode="group",
+    labels=dict(Ookla_Percentage="Population >50/10 (%)"),
+    category_orders={"PRCODE": list(PRCODE_MAP.keys())},
+    title="Ookla 50/10 Progress by Province",
+)
+fig.add_hline(y=canada_stats.loc["Urban", "Percentage_Ookla"])
+fig.add_hline(y=canada_stats.loc["Rural", "Percentage_Ookla"])
+fig.update_yaxes(range=[0, 100])
+st.plotly_chart(fig)
+
+st.markdown(
+    """
+We can compare the Ookla values, with those data as published by 
+in the National Broadband Map, broken down by province. Generally, 
+the trend is that the Ookla access is lower than the 
+published access levels. A few provinces, like Prince Edward Island 
+or Saskatchewan have substantial differences of 30% or more.
+"""
+)
+fig = px.bar(
+    pr_stats,
+    y="StatCan_Percentage",
+    x="PRCODE",
+    color="is_rural",
+    barmode="group",
+    labels=dict(Ookla_Percentage="Population >50/10 (%)"),
+    category_orders={"PRCODE": list(PRCODE_MAP.keys())},
+    title="StatCan Values",
+)
+fig.add_hline(y=canada_stats.loc["Urban", "Percentage_StatCan"])
+fig.add_hline(y=canada_stats.loc["Rural", "Percentage_StatCan"])
+fig.update_yaxes(range=[0, 100])
+st.plotly_chart(fig)
+
+st.markdown(
+    """
+Because the populations of the provinces are so vastly different, 
+in addition to the percentage, it is important to 
+note the actual population numbers of those affected. This can 
+be important as well, since Quebec sports a higher than average 
+rural access rate, it does also have a large population 
+of rural inhabitants who appear to lack access to suitable internet 
+speeds.
+"""
+)
+fig = px.bar(
+    pr_stats,
+    y="Ookla_Pop_below_50_10",
+    x="PRCODE",
+    color="is_rural",
+    category_orders={"PRCODE": list(PRCODE_MAP.keys())},
+    labels={"Ookla_Pop_below_50_10": "Population <50/10 (N)"},
+    title="Ookla Populations Lacking Access to 50/10 by Province",
+)
+st.plotly_chart(fig)
+####
 
 st.header("Mapping and Regional Statistics")
 st.markdown(
