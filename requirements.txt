@@ -7,4 +7,6 @@ scikit-learn
 matplotlib
 notebook
 jupyterlab
+folium
 streamlit
+streamlit-folium

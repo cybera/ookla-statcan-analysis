@@ -15,3 +15,5 @@ dependencies:
   - jupyterlab
   - pip
   - streamlit
+  - folium
+  - streamlit-folium
