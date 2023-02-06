@@ -1,4 +1,4 @@
-name: ookla-statcan
+name: ookla-statcan-test
 channels: 
   - conda-forge
   - defaults
@@ -13,7 +13,10 @@ dependencies:
   - matplotlib
   - notebook
   - jupyterlab
-  - pip
-  - streamlit
   - folium
-  - streamlit-folium
+  - plotly
+  - pip
+  - pip:
+    - streamlit
+    - streamlit-folium
+    - OSMPythonTools
