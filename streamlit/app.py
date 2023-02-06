@@ -563,3 +563,14 @@ popctr_table.rename(
 )
 
 st.dataframe(popctr_table.style.format(precision=0, thousands=","), height=1000)
+
+st.markdown(
+    """
+# Code and Analysis
+
+This Streamlit App and associated python code 
+used for the analysis is available at the 
+following public GitHub repository: 
+[github.com/cybera/ookla-statcan-analysis](https://github.com/cybera/ookla-statcan-analysis)
+"""
+)
