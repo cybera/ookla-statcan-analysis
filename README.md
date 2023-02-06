@@ -122,7 +122,7 @@ estimates a sequence of files needs to be run as follows:
 To run the Streamlit App, make sure the last file in the data pipeline 
 is downloaded and in the correct folder (`data/processed/statistical_geometries/LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg`)
 and that the python environment has all the necessary packages installed (listed in the requirements.txt or the environment.yml);
-and top level directory of this repo needs to be in the PYTHONPATH (`export PYTHONPATH="${PYTHONPATH}:$(pwd)`). 
+and top level directory of this repo needs to be in the PYTHONPATH (`export PYTHONPATH="${PYTHONPATH}:$(pwd)"`). 
 Then run `streamlit run streamlit/app.py`, which will start the app, defaulting to port 8501. It is 
 not a long-running background service (like Jupyter), so if the terminal running it is closed 
 the App will stop running. There's a few deployment options listed in the 
