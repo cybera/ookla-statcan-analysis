@@ -8,40 +8,12 @@ and the speed test data made available through
 
 Project Organization
 ------------
-Folder structure or organziation for this project:
-```
-├── README.md                       <- The top-level README for developers using this project.
-├── .gitignore                      <- Ignores files that shouldn't go into git (e.g. ./data/).
-│
-├── report                          <- The final report, figures, and any reference materials.
-│
-├── docker-compose.yml              <- Container instructions used when running docker-compose.
-├── docker
-│   ├── Dockerfile                  <- Dockerfile for building container.
-│   └── requirements.txt            <- Specifies additional python packages to install in container.
-│
-├── data
-│   ├── processed                   <- The final, canonical data sets for modeling.
-│   └── raw                         <- The original, immutable data dump. (make changes to copies only.)
-│
-├── models                          <- Trained and serialized models, model predictions, or model summaries.
-│
-├── notebooks                       <- Jupyter notebooks. Naming convention is a number (for ordering),
-│   │                                  the creator's initials, and a short `-` delimited description.
-│   └── 0.1-zs-basic-intro-nb.ipynb <- An example notebook.
-│
-└── scripts                   
-     ├── data                       <- Scripts to download or generate data.
-     ├── features                   <- Scripts to turn raw data into features for modeling.
-     ├── models                     <- Scripts to train models and then use trained models to make.
-     └── visualization              <- Scripts to create exploratory and results oriented visualizations.
-```
 
-
-You can regenerate similar on *nix systems using:
-     ```$tree -a -I '.git|.gitkeep|__init__.py'```
-
-<p><small>Project layout based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+The project is orgainized into the following directories: `data`, `notebooks`, `scripts`, `src`, and `streamlit`.
+`data` contains the downloaded and generated data and files; `notebooks` is for doing investigative 
+data analysis and prototyping functions in Jupyter notebooks; `scripts` is a location for python files which 
+are run to generate/transform data or do other setup work, etc.; `src` is a directory of common 
+python modules for the project; `streamlit` holds python files for a streamlit app. 
 
 
 Getting Started Instructions 
@@ -49,8 +21,10 @@ Getting Started Instructions
 
 Instructions for setting up a python environment and downloading the AWS CLI are listed below.
 
-Python Environment
-------------------
+
+## Setting Up Environment
+
+### Python Environment
 
 This project uses the python programming language. To install the required python packages 
 both a pip `requirements.txt` and a conda `environment.yml` are included in this repository.
@@ -70,8 +44,8 @@ conda env create -f environment.yml
 conda activate ookla-statcan
 ```
 
-Install AWS CLI
----------------
+### Install AWS CLI
+
 Install the AWS CLI as shown below. 
 ```
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -81,8 +55,11 @@ aws --version  # Check install
 ```
 These commands are from [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). 
 
-Run Handy Script
-----------------
+
+## Downloading Base Data
+These are steps for downloading data to do full analysis of the statcan-ookla datasets. 
+
+### Run Handy Script
 With AWS and Anaconda/Miniconda installed, a script called 'data_init.sh' can be run to download 
 the data and perform computations to postprocess the data. This can be run 
 as follows. Ensure you are in the `ookla-statcan-analysis` directory then:
@@ -99,8 +76,8 @@ replacing the angle brackets and CONTAINER ID with the ID of the running contain
 docker exec -it <CONTAINER ID> bash data_init.sh
 ```
 
-Data Download/Processing
-------------------------
+### Data Download/Processing
+
 If the script doesn't work, the steps are outlined below one by one.
 
 The AWS command line interface
@@ -127,40 +104,27 @@ python scripts/data/create_overalys.py
 The defined modules/functions in the `src/datasets/loading` directory are designed to download necessary StatCan files as needed.
 
 
+## Results & App Data
 
-Docker Setup
---------------------
-To be completed...
-<!-- 
-### Installation
-Before proceeding further, please install [Docker](https://www.docker.com/) following the instructions provided in the [link here](https://docs.docker.com/get-docker/) for your choice of operating system. 
+The results from the current analysis perform a complex and long running 
+set of calculations based on the geometries and data from both the Ookla and Statistics Canada
+data sets. To generate the main resulting geometries and derived internet speed
+estimates a sequence of files needs to be run as follows:
 
-### Setup 
+1. `data_init.sh` -> `data/ookla-raw/{ookla-global-data-files}`
+2. `scripts/data/process_raw_ookla_faster.py` -> `data/ookla-canada-tiles/{Canada-Quarterly-Ookla-Tiles-Subset}`
+3. `notebooks/ArbitraryGeomPHHCalc.ipynb` -> `data/processed/geometries/hexagons_w_dissolved_smaller_popctrs.geojson`
+4. `notebooks/LastYearOrBestValue.ipynb` -> `data/processed/statistical_geometries/LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg`
 
-From this project folder run the following command in your terminal to build and deploy the JupyterLab container:
-```
-docker-compose up --build
-```
-Use `CTRL + C` to stop JupyterLab and exit the docker container. 
+(Needs to be tested, but should work start to finish from scratch; supposed to download StatCan files on its own as needed.)
 
-To run the container in detached mode add `-d` as follows:
-```
-docker-compose up --build -d
-```
-
-If you have successfully built and deployed the JupyterLab image container using either of the above commands, you can access the web interface of the JupyterLab at 
-```
-http://localhost:8888
-```
-
-You might be prompted to enter the token while accessing the `http://localhost:8888`. The token can be obtained from the logs of the running JupyterLab container as follows. 
-
-```
-docker logs <container-id>
-```
-
-To view the list of all the containers and get the container id of the JupyterLab, run 
-```
-docker ps -a
-``` -->
+## Streamlit App
+To run the Streamlit App, make sure the last file in the data pipeline 
+is downloaded and in the correct folder (`data/processed/statistical_geometries/LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg`)
+and that the python environment has all the necessary packages installed (listed in the requirements.txt or the environment.yml);
+and top level directory of this repo needs to be in the PYTHONPATH (`export PYTHONPATH="${PYTHONPATH}:$(pwd)`). 
+Then run `streamlit run streamlit/app.py`, which will start the app, defaulting to port 8501. It is 
+not a long-running background service (like Jupyter), so if the terminal running it is closed 
+the App will stop running. There's a few deployment options listed in the 
+[documentation](https://docs.streamlit.io/knowledge-base/tutorials/deploy); the EC2 instance blog post suggests tmux which is pretty simple.
 
