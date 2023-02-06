@@ -11,6 +11,7 @@ from scipy.stats import lognorm
 import scipy.stats
 
 import functools
+import warnings
 
 
 @functools.cache
@@ -27,16 +28,21 @@ def hexagons_popctrs_overlay():
             "left_area": "pc_area",
         }
     )
-    # o["HEXPOPCTR_ID"] = o.apply(
-    #     lambda s: s.HEXuid_HEXidu + "-" + (str(s.PCPUID) if s.PCPUID else "XXXX"),
-    #     axis=1,
-    # )
+
+    #overlay generate some very narrow slices of empty areas,
+    #looks like its where small slivers of the cities overlap in between 
+    # hexagons where they don't 100% tesselate.
+    o  = o.dropna(subset=["HEXuid_HEXidu"])
+    
     o["HEXUID_PCPUID"] = o.HEXuid_HEXidu + "-" + o.PCPUID.fillna("XXXXXX").astype(str)
+
+    #take first two letters of Hex ID to generate province two letter alpha code
+    o["PRCODE"] = o["HEXuid_HEXidu"].apply(lambda s:s[0:2])
 
     return o
 
 
-def hexagons_popctrs_removed():
+def hexagons_popctrs_combined():
     o = hexagons_popctrs_overlay()
 
     rural_hexes = o[pd.isna(o.PCPUID)]
@@ -54,11 +60,45 @@ def hexagons_popctrs_removed():
     return pd.concat([dissolved_cities, rural_hexes])
 
 
-def add_simple_stats(boundary_geom, tiles, geom_index):
+def hexagons_small_popctrs_combined():
+    o = hexagons_popctrs_overlay()
+
+    popctrs = statcan.boundary("population_centres")
+
+    o = o.merge(popctrs[["PCPUID", "PCNAME", "PCCLASS"]], on="PCPUID", how="outer")
+
+    rural_hexes = o[pd.isna(o.PCPUID)]
+    city_hexes = o[~pd.isna(o.PCPUID)]
+
+    rural_hexes["HEXUID_PCPUID"] = rural_hexes["HEXUID_PCPUID"].str.replace(
+        "-XXXXXX", ""
+    )
+
+    # dissolving on PCPUID includes the province code so Lloydminster and other 
+    # multi-province cities aren't merged accross provincial borders.
+    dissolved_cities = (
+        city_hexes.loc[lambda s: s.PCCLASS != "4"]
+        .dissolve(
+            by="PCPUID",
+            aggfunc={"HEXuid_HEXidu": list, "PCNAME": "first", "PCCLASS": "first", "PRCODE":"first"},
+        )
+        .reset_index()
+    )
+    dissolved_cities["HEXUID_PCPUID"] = dissolved_cities["PCPUID"]
+
+    major_cities = city_hexes.loc[lambda s: s.PCCLASS == "4"]
+
+    return pd.concat([major_cities, dissolved_cities, rural_hexes])
+
+def _tile_join(geom, tiles, geom_index):
+    if geom_index in tiles:
+        warnings.warn(f"Tiles already have labels matching {geom_index}, skipping labelling.")
+        return tiles
+    
     unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
 
     join_result = (
-        boundary_geom[[geom_index, "geometry"]]
+        geom[[geom_index, "geometry"]]
         .to_crs(unique_tiles.crs)
         .sjoin(unique_tiles)
     )
@@ -66,6 +106,11 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
     geom_labelled_tiles = tiles.merge(
         join_result[["quadkey", geom_index]], on="quadkey", how="left"
     )
+    
+    return geom_labelled_tiles
+
+def add_simple_stats(boundary_geom, tiles, geom_index):
+    geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
 
     unique_devices = (
         geom_labelled_tiles.groupby(["quadkey", geom_index])["devices"]
@@ -137,17 +182,7 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
 
 
 def add_50_10_stats(boundary_geom, tiles, geom_index):
-    unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
-
-    join_result = (
-        boundary_geom[[geom_index, "geometry"]]
-        .to_crs(unique_tiles.crs)
-        .sjoin(unique_tiles)
-    )
-
-    geom_labelled_tiles = tiles.merge(
-        join_result[["quadkey", geom_index]], on="quadkey", how="left"
-    )
+    geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
 
     grps = geom_labelled_tiles.groupby(geom_index)
     ## calculate the obvious simple statistics
@@ -162,6 +197,32 @@ def add_50_10_stats(boundary_geom, tiles, geom_index):
         ],
         axis=1,
     )
+
+    return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
+
+
+def add_tile_info(boundary_geom, tiles, geom_index):
+    geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
+
+    geom_labelled_tiles["year+quarter"] = geom_labelled_tiles[
+        ["year", "quarter"]
+    ].apply(tuple, axis=1)
+
+    grps = geom_labelled_tiles.groupby(geom_index)
+
+    max_year = grps["year+quarter"].max()
+    # max_year = max_year.year.astype(str) + " Q" + max_year.quarter.astype(str)
+    # max_year = max_year.apply(lambda s: s[0] + " Q" + s[1], axis=1)
+    max_year = max_year.rename("max_year")
+
+    min_year = grps["year+quarter"].min()
+    # min_year = min_year.year.astype(str) + " Q" + min_year.quarter.astype(str)
+    min_year = min_year.rename("min_year")
+
+    connections = grps["conn_type"].apply(set)
+    connections = connections.rename("connections")
+
+    aggs = pd.concat([min_year, max_year, connections], axis=1)
 
     return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
 

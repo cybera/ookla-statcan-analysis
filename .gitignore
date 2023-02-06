@@ -96,3 +96,6 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+# Streamlit app nominatim search generates a cache folder
+cache
