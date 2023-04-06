@@ -10,5 +10,4 @@ jupyterlab
 folium
 streamlit
 streamlit-folium
-OSMPythonTools
 plotly
