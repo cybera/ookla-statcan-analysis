@@ -13,5 +13,5 @@ RUN mamba install --channel conda-forge --quiet --yes --file /requirements.txt
 
 RUN pip install awscli
 
-# COPY /data_init.sh /home/jovyan/data_init.sh
+COPY /data_init.sh /home/jovyan/data_init.sh
 ENV PYTHONPATH="/home/jovyan:."
