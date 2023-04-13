@@ -5,9 +5,7 @@ FROM jupyter/datascience-notebook
 ARG NB_USER="jovyan"
 ARG NB_UID="1000"
 ARG NB_GID="1000"
-RUN mkdir /home/jovyan/.local
 
-ENV JUPYTER_ALLOW_INSECURE_WRITES=0
 # USER root
 ENV HOME="/home/${NB_USER}"
 # RUN chown 1000:100 /home/jovyan/.local
@@ -41,5 +39,3 @@ COPY --chown=${NB_UID}:${NB_GID} requirements.txt /tmp/
 #?
 COPY /data_init.sh /home/jovyan/data_init.sh
 ENV PYTHONPATH="/home/jovyan:."
-
-# RUN sudo chmod -R 777 .local
