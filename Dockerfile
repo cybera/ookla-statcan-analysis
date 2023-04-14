@@ -29,11 +29,11 @@ RUN mamba install --yes --file /tmp/requirements.txt && \
 # RUN mamba install --channel conda-forge --quiet --yes --file /requirements.txt
 
 # USER root
-# RUN sudo chown -R ${NB_USER}:${NB_USER} /home/jovyan/.local
+RUN sudo chown -R ${NB_USER}:${NB_USER} /home/jovyan
 # RUN sudo chmod -R 777 /home/jovyan
 # USER ${NB_USER}
 
-# RUN pip install awscli
+RUN pip install awscli
 
 #?
 # COPY /data_init.sh /home/jovyan/data_init.sh
