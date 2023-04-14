@@ -33,7 +33,7 @@ RUN mamba install --yes --file /tmp/requirements.txt && \
 # RUN sudo chmod -R 777 /home/jovyan
 # USER ${NB_USER}
 
-RUN pip install awscli
+# RUN pip install awscli
 
 #?
 # COPY /data_init.sh /home/jovyan/data_init.sh
