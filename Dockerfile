@@ -8,8 +8,8 @@ COPY /requirements.txt /
 
 # Install packages from requirements.txt file
 #ENV GDAL_VERSION=1.8
-#RUN pip install -r /requirements.txt
-RUN mamba install --channel conda-forge --quiet --yes --file /requirements.txt
+RUN pip install -r /requirements.txt
+# RUN mamba install --channel conda-forge --quiet --yes --file /requirements.txt
 
 RUN pip install awscli
 

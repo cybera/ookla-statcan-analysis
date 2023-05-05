@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   jupyter:
+    user: root
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,3 +11,16 @@ services:
       - .:/home/jovyan
     environment:
       - JUPYTER_ENABLE_LAB=True
+      - NB_UID=1002
+      - NB_GID=1002
+      # - CHOWN_HOME=yes
+      # - CHOWN_HOME_OPTS=-R
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8501:8501'
+    volumes:
+      - .:/home/jovyan
+    command: streamlit run streamlit/app.py
