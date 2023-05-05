@@ -12,6 +12,7 @@ from OSMPythonTools.api import Api
 from OSMPythonTools.nominatim import Nominatim
 
 import plotly.express as px
+import plotly.graph_objects as go
 
 # memoize boundary loading function
 statcan.boundary = st.experimental_singleton(statcan.boundary)
@@ -201,11 +202,14 @@ def pcclass_percentage_breakdown(sample_data):
         .replace({"2": "Small", "3": "Medium", "4": "Large", "": "Rural"})
         .values
     ).rename("Population Center Type")
-    stats_table = stats_table.append(
-        sample_data[["Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"]]
-        .sum()
-        .rename("Total")
-    )
+    # stats_table = stats_table.append(
+    #     sample_data[["Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"]]
+    #     .sum()
+    #     .rename("Total")
+    # )
+    other = sample_data[["Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"]].sum().rename("Total")
+    other = pd.DataFrame(other).T
+    stats_table = pd.concat([stats_table, other],axis=0)
 
     stats_table["Percentage_StatCan"] = (
         stats_table["Pop2016_at_50_10_Combined"] / stats_table["Pop2016"] * 100
@@ -227,11 +231,18 @@ def rural_urban_percentage_breakdown(sample_data):
     stats_table.index = pd.Index(
         pd.Series(stats_table.index).replace({True: "Rural", False: "Urban"}).values
     )
-    stats_table = stats_table.append(
-        sample_data[["Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"]]
+    # st.write(stats_table)
+    # stats_table = stats_table.append(
+    #     sample_data[["Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"]]
+    #     .sum()
+    #     .rename("Total")
+    # )
+    other = (sample_data[["Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"]]
         .sum()
         .rename("Total")
     )
+    other = pd.DataFrame(other).T
+    stats_table = pd.concat([stats_table, other],axis=0)
 
     stats_table["Percentage_StatCan"] = (
         stats_table["Pop2016_at_50_10_Combined"] / stats_table["Pop2016"] * 100
@@ -347,10 +358,10 @@ with col2:
     st.plotly_chart(fig, use_container_width=True)
 
 #####
-
-pr_stats = speed_data.groupby(["PRCODE", "is_rural"])[
+# st.write(speed_data)
+pr_stats = speed_data.groupby(["PRCODE", "is_rural"])[[
     "Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"
-].sum()
+]].sum()
 pr_stats = pd.DataFrame(pr_stats).reset_index()
 pr_stats["Pop2016_below_50_10_Combined"] = (
     pr_stats["Pop2016"] - pr_stats["Pop2016_at_50_10_Combined"]
@@ -362,10 +373,8 @@ pr_stats["StatCan_Percentage"] = (
 pr_stats["Ookla_Percentage"] = (
     pr_stats["Ookla_Pop_at_50_10"] / pr_stats["Pop2016"] * 100
 )
+
 # pr_stats
-
-import plotly.graph_objects as go
-
 # fig = go.Figure(data=[go.bar(name="Urban", x="")])
 
 
