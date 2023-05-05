@@ -118,6 +118,10 @@ estimates a sequence of files needs to be run as follows:
 
 (Needs to be tested, but should work start to finish from scratch; supposed to download StatCan files on its own as needed.)
 
+It is also possible to download the results for the streamlit app using the following:
+`curl -O https://swift-yyc.cloud.cybera.ca:8080/v1/AUTH_233e84cd313945c992b4b585f7b9125d/ookla-statcan-analysis/LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg`
+and moving it into the folder `data/processed/statistical_geometries/`.
+
 ## Streamlit App
 To run the Streamlit App, make sure the last file in the data pipeline 
 is downloaded and in the correct folder (`data/processed/statistical_geometries/LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg`)
