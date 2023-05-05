@@ -24,3 +24,12 @@ services:
     volumes:
       - .:/home/jovyan
     command: streamlit run streamlit/app.py
+  streamlit-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8505:8501'
+    volumes:
+      - .:/home/jovyan
+    command: streamlit run streamlit/speed_model.py
