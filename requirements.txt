@@ -12,3 +12,4 @@ streamlit
 streamlit-folium
 OSMPythonTools
 plotly
+mapclassify
