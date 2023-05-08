@@ -10,6 +10,7 @@ This is a space to work and make a new app!
 
 #### EDA SECTION
 st.write("A")
+#Need to add visualization graph for the percentage gap in expects speeds
 
 
 
