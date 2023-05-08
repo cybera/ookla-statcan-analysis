@@ -12,7 +12,8 @@ This is a space to work and make a new app!
 st.write("A")
 
 
-
+#### Population-wise Analysis
+st.write("## Population-wise Analysis")
 
 #### Clustering Section
 st.write("A")
