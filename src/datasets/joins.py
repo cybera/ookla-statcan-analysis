@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 import geopandas as gp
 import pandas as pd
 import numpy as np
@@ -29,15 +31,15 @@ def hexagons_popctrs_overlay():
         }
     )
 
-    #overlay generate some very narrow slices of empty areas,
-    #looks like its where small slivers of the cities overlap in between 
+    # overlay generate some very narrow slices of empty areas,
+    # looks like its where small slivers of the cities overlap in between
     # hexagons where they don't 100% tesselate.
-    o  = o.dropna(subset=["HEXuid_HEXidu"])
-    
+    o = o.dropna(subset=["HEXuid_HEXidu"])
+
     o["HEXUID_PCPUID"] = o.HEXuid_HEXidu + "-" + o.PCPUID.fillna("XXXXXX").astype(str)
 
-    #take first two letters of Hex ID to generate province two letter alpha code
-    o["PRCODE"] = o["HEXuid_HEXidu"].apply(lambda s:s[0:2])
+    # take first two letters of Hex ID to generate province two letter alpha code
+    o["PRCODE"] = o["HEXuid_HEXidu"].apply(lambda s: s[0:2])
 
     return o
 
@@ -74,13 +76,18 @@ def hexagons_small_popctrs_combined():
         "-XXXXXX", ""
     )
 
-    # dissolving on PCPUID includes the province code so Lloydminster and other 
+    # dissolving on PCPUID includes the province code so Lloydminster and other
     # multi-province cities aren't merged accross provincial borders.
     dissolved_cities = (
         city_hexes.loc[lambda s: s.PCCLASS != "4"]
         .dissolve(
             by="PCPUID",
-            aggfunc={"HEXuid_HEXidu": list, "PCNAME": "first", "PCCLASS": "first", "PRCODE":"first"},
+            aggfunc={
+                "HEXuid_HEXidu": list,
+                "PCNAME": "first",
+                "PCCLASS": "first",
+                "PRCODE": "first",
+            },
         )
         .reset_index()
     )
@@ -90,24 +97,26 @@ def hexagons_small_popctrs_combined():
 
     return pd.concat([major_cities, dissolved_cities, rural_hexes])
 
+
 def _tile_join(geom, tiles, geom_index):
     if geom_index in tiles:
-        warnings.warn(f"Tiles already have labels matching {geom_index}, skipping labelling.")
+        warnings.warn(
+            f"Tiles already have labels matching {geom_index}, skipping labelling."
+        )
         return tiles
-    
+
     unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
 
     join_result = (
-        geom[[geom_index, "geometry"]]
-        .to_crs(unique_tiles.crs)
-        .sjoin(unique_tiles)
+        geom[[geom_index, "geometry"]].to_crs(unique_tiles.crs).sjoin(unique_tiles)
     )
 
     geom_labelled_tiles = tiles.merge(
         join_result[["quadkey", geom_index]], on="quadkey", how="left"
     )
-    
+
     return geom_labelled_tiles
+
 
 def add_simple_stats(boundary_geom, tiles, geom_index):
     geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
@@ -140,38 +149,9 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
             grps["avg_u_kbps"].quantile(0.75).rename("75p_u_kbps"),
             grps["avg_u_kbps"].max().rename("max_u_kbps"),
             grps["avg_lat_ms"].mean(),
-            # grps["avg_d_kbps"]
-            # .agg(lambda x: np.mean(np.log(x)))
-            # .rename("logmean_d_kbps"),
-            # grps["avg_d_kbps"].agg(lambda x: np.var(np.log(x))).rename("logvar_d_kbps"),
-            # grps["avg_u_kbps"]
-            # .agg(lambda x: np.mean(np.log(x)))
-            # .rename("logmean_u_kbps"),
-            # grps["avg_u_kbps"].agg(lambda x: np.var(np.log(x))).rename("logvar_u_kbps"),
-            # grps.apply(
-            #     lambda df: sm.stats.weightstats.DescrStatsW(
-            #         np.log(df["avg_d_kbps"]), df["tests"]
-            #     ).mean
-            # ).rename("weighted_logmean_d_kbps"),
-            # grps.apply(
-            #     lambda df: sm.stats.weightstats.DescrStatsW(
-            #         np.log(df["avg_d_kbps"]), df["tests"]
-            #     ).var
-            # ).rename("weighted_logvar_d_kbps"),
-            # grps.apply(
-            #     lambda df: sm.stats.weightstats.DescrStatsW(
-            #         np.log(df["avg_u_kbps"]), df["tests"]
-            #     ).mean
-            # ).rename("weighted_logmean_u_kbps"),
-            # grps.apply(
-            #     lambda df: sm.stats.weightstats.DescrStatsW(
-            #         np.log(df["avg_u_kbps"]), df["tests"]
-            #     ).var
-            # ).rename("weighted_logvar_u_kbps"),
             grps["tests"].sum(),
             grps["tests"].mean().rename("ave_tests_per_tile"),
             unique_devices,
-            # grps["devices"].sum(),
             grps["devices"].mean().rename("ave_devices_per_tile"),
             grps["avg_d_kbps"].count().rename("num_tiles"),
         ],
@@ -227,74 +207,48 @@ def add_tile_info(boundary_geom, tiles, geom_index):
     return boundary_geom.merge(aggs, left_on=geom_index, right_index=True, how="left")
 
 
+SampleStats = namedtuple("SampleStats", ["mean", "var", "std"])
+
+
+def varying_sample_stats(sample, col, weight):
+    u = (sample.loc[:, col] * sample.loc[:, weight]).sum() / sample.loc[:, weight].sum()
+    s2 = (
+        1
+        / sample.loc[:, weight].count()
+        * ((sample.loc[:, col] - u) ** 2 * sample.loc[:, weight]).sum()
+    )
+    s = np.sqrt(s2)
+    return SampleStats(u, s2, s)
+
+
 def add_logvar_stats(boundary_geom, tiles, geom_index):
-    raise ValueError("Not implemented proplerly yet.")
-    # TODO: remove stats from simple stat func
-    unique_tiles = tiles[["quadkey", "geometry"]].drop_duplicates()
-
-    join_result = (
-        boundary_geom[[geom_index, "geometry"]]
-        .to_crs(unique_tiles.crs)
-        .sjoin(unique_tiles)
-    )
-
-    geom_labelled_tiles = tiles.merge(
-        join_result[["quadkey", geom_index]], on="quadkey", how="left"
-    )
+    geom_labelled_tiles = _tile_join(boundary_geom, tiles, geom_index)
+    geom_labelled_tiles["log_avg_d_kbps"] = np.log(geom_labelled_tiles["avg_d_kbps"])
+    geom_labelled_tiles["log_avg_u_kbps"] = np.log(geom_labelled_tiles["avg_u_kbps"])
 
     grps = geom_labelled_tiles.groupby(geom_index)
     aggs = pd.concat(
         [
-            grps["avg_d_kbps"].mean(),
-            grps["avg_d_kbps"].std().rename("std_d_kbps"),
-            grps["avg_d_kbps"].min().rename("min_d_kbps"),
-            grps["avg_d_kbps"].max().rename("max_d_kbps"),
-            grps["avg_u_kbps"].mean(),
-            grps["avg_lat_ms"].mean(),
-            grps["avg_d_kbps"].std().rename("std_u_kbps"),
-            grps["avg_u_kbps"].min().rename("min_u_kbps"),
-            grps["avg_u_kbps"].max().rename("max_u_kbps"),
-            grps["avg_d_kbps"]
-            .agg(lambda x: np.mean(np.log(x)))
-            .rename("logmean_d_kbps"),
-            grps["avg_d_kbps"].agg(lambda x: np.var(np.log(x))).rename("logvar_d_kbps"),
-            grps["avg_u_kbps"]
-            .agg(lambda x: np.mean(np.log(x)))
-            .rename("logmean_u_kbps"),
-            grps["avg_u_kbps"].agg(lambda x: np.var(np.log(x))).rename("logvar_u_kbps"),
             grps.apply(
-                lambda df: sm.stats.weightstats.DescrStatsW(
-                    np.log(df["avg_d_kbps"]), df["tests"]
-                ).mean
-            ).rename("weighted_logmean_d_kbps"),
+                lambda df: varying_sample_stats(df, "log_avg_d_kbps", "tests").mean
+            ).rename("log_mean_d_kbps"),
             grps.apply(
-                lambda df: sm.stats.weightstats.DescrStatsW(
-                    np.log(df["avg_d_kbps"]), df["tests"]
-                ).var
-            ).rename("weighted_logvar_d_kbps"),
+                lambda df: varying_sample_stats(df, "log_avg_d_kbps", "tests").std
+            ).rename("log_std_d_kbps"),
             grps.apply(
-                lambda df: sm.stats.weightstats.DescrStatsW(
-                    np.log(df["avg_u_kbps"]), df["tests"]
-                ).mean
-            ).rename("weighted_logmean_u_kbps"),
+                lambda df: varying_sample_stats(df, "log_avg_u_kbps", "tests").mean
+            ).rename("log_mean_u_kbps"),
             grps.apply(
-                lambda df: sm.stats.weightstats.DescrStatsW(
-                    np.log(df["avg_u_kbps"]), df["tests"]
-                ).var
-            ).rename("weighted_logvar_u_kbps"),
-            grps["tests"].sum(),
-            grps["tests"].mean().rename("ave_tests_per_tile"),
-            grps["devices"].sum(),
-            grps["devices"].mean().rename("ave_devices_per_tile"),
-            grps["avg_d_kbps"].count().rename("num_tiles"),
+                lambda df: varying_sample_stats(df, "log_avg_u_kbps", "tests").std
+            ).rename("log_std_u_kbps"),
         ],
         axis=1,
     )
 
     rvs_down = aggs.apply(
         lambda s: lognorm(
-            s=np.sqrt(s.weighted_logvar_d_kbps),
-            scale=np.exp(s.weighted_logmean_d_kbps),
+            s=s["log_std_d_kbps"],
+            scale=np.exp(s["log_mean_d_kbps"]),
         ),
         axis=1,
     )
@@ -307,8 +261,8 @@ def add_logvar_stats(boundary_geom, tiles, geom_index):
 
     rvs_up = aggs.apply(
         lambda s: lognorm(
-            s=np.sqrt(s.weighted_logvar_u_kbps),
-            scale=np.exp(s.logmean_u_kbps),
+            s=s["log_std_u_kbps"],
+            scale=np.exp(s["log_mean_u_kbps"]),
         ),
         axis=1,
     )
