@@ -5,3 +5,6 @@ st.write("# Hello!")
 st.write("""
 This is a space to work and make a new app!
 """)
+
+#### Forecasting Section
+st.write("Forecasting")
