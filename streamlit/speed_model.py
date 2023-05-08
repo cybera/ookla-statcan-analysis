@@ -6,6 +6,8 @@ st.write("""
 This is a space to work and make a new app!
 """)
 
+#### Forecasting Section
+st.write("Forecasting")
 
 
 #### EDA SECTION
@@ -18,8 +20,6 @@ st.write("## Population-wise Analysis")
 
 #### Clustering Section
 st.write("A")
-
-
 
 
 #### Other Activity Of Interest 

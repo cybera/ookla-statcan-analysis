@@ -43,7 +43,7 @@ echo ''
 SECONDS=0
 echo "Generating complex geometry overlays"
 python scripts/data/create_overlays.py population_centres pops
-# python scripts/data/create_overlays.py dissemination_areas das
+python scripts/data/create_overlays.py dissemination_areas das
 overlay_duration=$SECONDS
 duration=overlay_duration
 echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
