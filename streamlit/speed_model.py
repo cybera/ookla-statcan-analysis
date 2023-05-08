@@ -8,3 +8,19 @@ This is a space to work and make a new app!
 
 #### Forecasting Section
 st.write("Forecasting")
+
+
+#### EDA SECTION
+st.write("A")
+#Need to add visualization graph for the percentage gap in expects speeds
+
+
+#### Population-wise Analysis
+st.write("## Population-wise Analysis")
+
+#### Clustering Section
+st.write("A")
+
+
+#### Other Activity Of Interest 
+st.write("A")
