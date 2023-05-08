@@ -124,11 +124,20 @@ import matplotlib as mpl
 cmap = ListedColormap(["red", "orange", "yellow", "blue"], name="progress")
 mpl.colormaps.register(cmap, force=True)
 
+
 # @st.cache
 # def generate_map(gdf):
 # @st.experimental_memo
 def generate_map(prname, cdname="All", ername="All"):
     gdf = subset_region(prname, cdname, ername)
+
+    for_map = gdf.loc[lambda s: s.Pop2016 > 0.0, ["HEXUID_PCPUID", "geometry"]]
+    for_map["City"] = gdf["PCNAME"].fillna("-")
+    for_map["Pop. (2016)"] = gdf["Pop2016"]
+    for_map["Percent >50/10"] = gdf["ookla_50_10_percentile"]
+    for_map["Ookla Tests"] = gdf["tests"]
+    # for_map["Speed (Mbps)"] = gdf[""]
+
     print("Generating map")
     map = gdf.loc[lambda s: s.Pop2016 > 0.0].explore(
         "ookla_50_10_percentile",
@@ -171,6 +180,7 @@ def generate_map(prname, cdname="All", ername="All"):
             "Up_10_percentile",
         ],
     )
+    # map = for_map.explore("Percent >50/10", scheme="equalinterval", k=4)
     return map
 
 
@@ -224,7 +234,7 @@ def pcclass_percentage_breakdown(sample_data):
     return stats_table
 
 
-def rural_urban_percentage_breakdown(sample_data):
+def rural_urban_percentage_breakdown(sample_data) -> pd.DataFrame:
     stats_table = sample_data.groupby("is_rural")[
         ["Pop2016", "Pop2016_at_50_10_Combined", "Ookla_Pop_at_50_10"]
     ].sum()
@@ -280,11 +290,34 @@ at the 50/10 level than indicated by the National Broadband Map.
 """
 )
 canada_stats = rural_urban_percentage_breakdown(speed_data)
+canada_stats["Difference"] = (
+    -canada_stats["Percentage_StatCan"] + canada_stats["Percentage_Ookla"]
+)
 canada_stats.replace({True: "Rural", False: "Urban"}, inplace=True)
-canada_stats = canada_stats.loc[
-    ["Urban", "Rural", "Total"], ["Pop2016", "Percentage_StatCan", "Percentage_Ookla"]
+
+presented_canada_stats = canada_stats.rename(
+    {
+        "Percentage_StatCan": "Ntl. Broadband Map",
+        "Percentage_Ookla": "Ookla Speed Test",
+        "Pop2016": "Population (2016)",
+    },
+    axis=1,
+)
+presented_canada_stats = presented_canada_stats.loc[
+    ["Urban", "Rural", "Total"],
+    ["Ntl. Broadband Map", "Ookla Speed Test", "Difference", "Population (2016)"],
 ]
-st.table(canada_stats.style.format(precision=0, thousands=","))
+st.table(
+    presented_canada_stats.style.format(
+        precision=0,
+        thousands=",",
+        formatter={
+            "Ntl. Broadband Map": "{:.0f}%",
+            "Ookla Speed Test": "{:.0f}%",
+            "Difference": "{:.0f}%",
+        },
+    ).applymap(lambda x: "color:red;" if x < 0 else None)
+)
 
 for_pies = rural_urban_percentage_breakdown(speed_data)
 for_pies["StatCan_Pop_below_50_10"] = for_pies.apply(
@@ -414,8 +447,15 @@ fig = px.bar(
     category_orders={"PRCODE": list(PRCODE_MAP.keys())},
     title="Ookla 50/10 Progress by Province",
 )
-fig.add_hline(y=canada_stats.loc["Urban", "Percentage_Ookla"])
-fig.add_hline(y=canada_stats.loc["Rural", "Percentage_Ookla"])
+fig.add_hline(
+    y=canada_stats.loc["Urban", "Percentage_Ookla"],
+    annotation_text="Urban Avg.",
+)
+fig.add_hline(
+    y=canada_stats.loc["Rural", "Percentage_Ookla"],
+    annotation_text="Rural Avg.",
+    line_dash="dash",
+)
 fig.update_yaxes(range=[0, 100])
 st.plotly_chart(fig)
 
@@ -525,9 +565,29 @@ breakdown of Small/Medium/Large population centers and
 how this differs by province compared to the national average.
 """
 )
+region_table = pcclass_percentage_breakdown(speed_data_subset)
+region_table["Pop. <50/10"] = (
+    region_table["Pop2016"] - region_table["Ookla_Pop_at_50_10"]
+)
+region_table = region_table.rename(
+    columns={
+        "Percentage_StatCan": "Ntl. Broadband Map",
+        "Percentage_Ookla": "Ookla Speed Test",
+        "Pop2016": "Population (2016)",
+    }
+)
+region_table = region_table.loc[
+    :,
+    ["Pop. <50/10", "Ntl. Broadband Map", "Ookla Speed Test", "Population (2016)"],
+]
 st.table(
-    pcclass_percentage_breakdown(speed_data_subset).style.format(
-        precision=0, thousands=","
+    region_table.style.format(
+        precision=0,
+        thousands=",",
+        formatter={
+            "Ntl. Broadband Map": "{:.0f}%",
+            "Ookla Speed Test": "{:.0f}%",
+        },
     )
 )
 
