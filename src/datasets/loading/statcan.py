@@ -155,10 +155,10 @@ def hexagon_data():
 
 @functools.cache
 def _phh_MapInfo():
-    shapefiles = list(PHH_DIR.glob("./PHH_DATA_MapInfo/*.TAB"))
+    shapefiles = list(PHH_DIR.glob("./PHH_Data_MapInfo/*.TAB"))
     if len(shapefiles) == 0 and AUTO_DOWNLOAD:
         download_phh()
-        shapefiles = list(PHH_DIR.glob("./PHH_DATA_MapInfo/*.TAB"))
+        shapefiles = list(PHH_DIR.glob("./PHH_Data_MapInfo/*.TAB"))
 
     gdf = pd.concat([gp.read_file(f) for f in shapefiles], axis=0).reset_index(
         drop=True
@@ -178,10 +178,10 @@ def phh_data():
 
 @functools.cache
 def phh_csv_data():
-    csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
+    csv_files = list(PHH_DIR.glob("./PHH_Data_CSV/*.csv"))
     if len(csv_files) == 0 and AUTO_DOWNLOAD:
         download_phh()
-        csv_files = list(PHH_DIR.glob("./PHH_DATA_CSV/*.csv"))
+        csv_files = list(PHH_DIR.glob("./PHH_Data_CSV/*.csv"))
     return pd.concat([pd.read_csv(f) for f in csv_files], axis=0).reset_index(drop=True)
 
 
@@ -272,7 +272,6 @@ def census_divisions_populations():
 
 
 if __name__ == "__main__":
-
     print("Downloading all statcan census boundary files")
     download_boundaries()
 
