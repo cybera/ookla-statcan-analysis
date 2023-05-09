@@ -1,4 +1,8 @@
 import streamlit as st
+import pandas as pd
+
+import plotly.express as px
+import plotly.graph_objects as go
 
 st.write("# Hello!")
 
@@ -11,7 +15,8 @@ This is a space to work and make a new app!
 #### EDA SECTION
 st.write("A")
 
-# Checking if the file is updated from branch not on Mail 
+for_visualization = pd.read_csv("./notebooks/generated_csv/Gap Analysis.csv")
+st.write(for_visualization)
 
 
 
