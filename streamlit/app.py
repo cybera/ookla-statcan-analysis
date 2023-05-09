@@ -19,7 +19,7 @@ statcan.boundary = st.experimental_singleton(statcan.boundary)
 
 output_name = "LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg"
 output_dir = src.config.DATA_DIRECTORY / "processed" / "statistical_geometries"
-output_dir.mkdir(exist_ok=True)
+output_dir.mkdir(parents=True, exist_ok=True)
 
 CRS = "EPSG:4326"
 
