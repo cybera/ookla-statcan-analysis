@@ -15,7 +15,7 @@ This is a space to work and make a new app!
 #### EDA SECTION
 st.write("A")
 
-for_visualization = pd.read_csv("./notebooks/generated_csv/Gap Analysis.csv")
+for_visualization = pd.read_csv("./notebooks/Gap_Analysis.csv")
 st.write(for_visualization)
 
 
