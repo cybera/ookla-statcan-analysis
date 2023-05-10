@@ -206,3 +206,25 @@ else:
 st.markdown('''
 The ADF test statistic of -3.16 and a p-value of 0.022 indicate that the differenced data is statistically significant and provides strong evidence to reject the null hypothesis of non-stationarity. Therefore, we can conclude that the differencing operation has effectively transformed the time series into a stationary process, making it suitable for further analysis and modeling.
 ''')
+
+st.markdown('### 2.5. Auto Correlation Checks After Differencing')
+st.markdown('''
+Using the differenced data, ACF and PACF plots were regenerated to decide ARIMA model parameters (p and q, d is set to 1 with first order differencing).
+''')
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+plot_acf(diff_df['avg_d_kbps'],
+         title='ACF of Alberta Download Speed',
+         ax = ax1)
+plot_pacf(diff_df['avg_d_kbps'],
+          title='PACF of Alberta Download Speed',
+          lags = 5,
+          ax = ax2)
+plt.tight_layout()
+st.pyplot(fig)
+
+st.markdown('''
+Based on the absence of significant spikes in the autocorrelation function (ACF) and partial autocorrelation function (PACF) after differencing the dataset, it can be concluded that the differenced data does not exhibit any apparent linear relationship or correlation with its past values. This suggests that the differenced series may not possess any significant autoregressive (AR) or moving average (MA) components.
+
+In cases, when the ACF and PACF plots do not show significant autocorrelation patterns, it indicates that an ARIMA (Autoregressive Integrated Moving Average) model is not appropriate for modeling the data. Instead, alternative approaches such as non-linear models, machine learning algorithms, or other techniques may be considered.
+''')
