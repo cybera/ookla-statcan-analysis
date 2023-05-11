@@ -14,8 +14,14 @@ import plotly.express as px
 import matplotlib.pyplot as plt 
 
 
+
+st.write("# Internet Speed Distribution Analysis")
+st.write("Welcome to the internet speed analysis based on province and population section!")
+st.write("Here, you can choose a province in Canada and a lower and higher percentile bound on the population in that province.")
+st.write("For instance, if you choose 10 to 25 percentile and Alberta as the target province, you'll be looking at low population areas in Alberta.")
+
 @st.cache_data
-def load_csv_file(df_type:str, base_path: str, file_name:str):
+def load_database_file(df_type:str, base_path: str, file_name:str):
     """
     load in the dataframe whether pandas or geopandas
     """
@@ -28,10 +34,9 @@ def load_csv_file(df_type:str, base_path: str, file_name:str):
     return result
 
 
-st.write("# Box Plotting for Internet Speed Analysis")
 
-path_to_files = "data/dataframes/"
-features_table = load_csv_file(df_type="gp", base_path=path_to_files, file_name="features_table.gpkg")
+path_to_files = "data/"
+features_table = load_database_file(df_type="gp", base_path=path_to_files, file_name="features_table.gpkg")
 
 
 def get_databaset_subset_province_percentile(database: gp.geodataframe.GeoDataFrame,
@@ -72,6 +77,8 @@ def get_filtered_download_and_upload_speeds(filtered_features_table, remove_outl
     filtered_up_speed = filtered_up_speed[filtered_up_speed < up_third_quartile]
     return filtered_down_speed, filtered_up_speed
 
+
+st.write("## Inputs:")
 input_col, _ = st.columns(2)
 
 low_percentile = int(input_col.text_input("Lower bound percentile:", value='0'))
@@ -90,10 +97,12 @@ filtered_down_speed, filtered_up_speed = get_filtered_download_and_upload_speeds
 
 if st.button("Filter and plot"):
     # Create the box plot using Plotly
-    fig = go.Figure()
-    fig.add_trace(go.Box(y=filtered_down_speed, name="Download Speed [Kbps]"))
-    fig.add_trace(go.Box(y=filtered_up_speed, name="Upload Speed [Kbps]"))
-    fig.update_layout(xaxis_title="Download/Upload", yaxis_title="Speed [Kbps]", 
+    st.write("## Output:")
+
+    box_fig = go.Figure()
+    box_fig.add_trace(go.Box(y=filtered_down_speed, name="Download Speed [Kbps]"))
+    box_fig.add_trace(go.Box(y=filtered_up_speed, name="Upload Speed [Kbps]"))
+    box_fig.update_layout(xaxis_title="Download/Upload", yaxis_title="Speed [Kbps]", 
         title={
             'text': f"{selected_province} Speeds",
             'y': 0.95,
@@ -102,7 +111,46 @@ if st.button("Filter and plot"):
             'yanchor': 'top',
             'font': {'size': 20, 'family': 'Arial', 'color': 'black'}
         })
-    st.plotly_chart(fig)
+    st.plotly_chart(box_fig)
+
+
+    down_speed_hist = px.histogram(
+        filtered_down_speed,  
+        nbins=20, 
+        title="Download Speeds Distribution",
+        opacity=0.75, 
+        color_discrete_sequence=['steelblue']
+    )
+
+    up_speed_hist = px.histogram(
+        filtered_up_speed,  
+        nbins=20, 
+        title="Upload Speeds Distribution",
+        opacity=0.75, 
+        color_discrete_sequence=['steelblue']
+    )
+
+    down_speed_hist.update_layout(
+        xaxis_title="Download Speed [Kbps]", 
+        yaxis_title="Count", 
+        font=dict(family="Arial", size=20),
+        showlegend=False,
+        barmode='overlay',
+        title_x=0.5
+            
+    )   
+
+    up_speed_hist.update_layout(
+    xaxis_title="Upload Speed [Kbps]", 
+    yaxis_title="Count", 
+    font=dict(family="Arial", size=20),
+    showlegend=False,
+    barmode='overlay',
+    title_x=0.5
+    )
+
+    st.plotly_chart(down_speed_hist)
+    st.plotly_chart(up_speed_hist)
 
     # calculate summary statistics
     down_stats = pd.Series(filtered_down_speed).describe()
@@ -114,6 +162,7 @@ if st.button("Filter and plot"):
         "Upload Speed [Kbps]": up_stats
     })
 
+    st.write("Below will show a summary of the statistics for the internet upload and download speed for your population and province selection.")
     # display the table of summary statistics
     st.write("Summary Statistics:")
     st.table(stats_df)
