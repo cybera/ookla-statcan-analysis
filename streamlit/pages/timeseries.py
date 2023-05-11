@@ -51,8 +51,14 @@ def generate_graph1(province, options):
 fig = generate_graph1(p1, o1)
 st.plotly_chart(fig)
 
-st.markdown('**Insights**')
-st.markdown('will add one paragraph here')
+st.markdown('<span style="color:darkgray;">**Insights**</span>', unsafe_allow_html=True)
+st.markdown('''
+Based on the analysis of upload and download speeds across provinces, following insights can be drawn. Firstly, for upload speed, Nunavut stands out as the only province that experienced a significant decrease in speed from 2019Q3 to 2023Q1, dropping from 45.9k to 8.5k kbps. This suggests a potential issue or challenge specific to Nunavut's upload infrastructure.
+
+On the other hand, for download speed, all provinces have shown improvements compared to 2019q1. However, there was a noticeable decrease between 2022Q1 and 2022Q2 for most provinces. This dip in performance could be attributed to temporary factors such as network upgrades or maintenance activities. Fortunately, the subsequent data indicates a clear upward trend, indicating that the download speeds have recovered and continued to improve.
+
+Overall, the data suggests that provinces have made progress in terms of download speed, while the issue of lower upload speed in Nunavut needs further attention. These insights can inform decision-making processes regarding network infrastructure investments and improvement strategies to enhance both upload and download speeds across provinces, ensuring better internet experiences for residents and businesses.
+''')
 
 st.markdown('### 1.2. Download & Upload Speed Comparison')
 st.markdown('Following time series line chart display the relative development of download and upload speeds at provinces.')
@@ -74,8 +80,16 @@ def generate_graph2(province):
 fig_2 = generate_graph2(p2)
 st.plotly_chart(fig_2)
 
-st.markdown('**Insights**')
-st.markdown('will add one paragraph here')
+st.markdown('<span style="color:darkgray;">**Insights**</span>', unsafe_allow_html=True)
+st.markdown('''
+Download speed/upload speed ratio is a metric that measures the ratio between the download speed and upload speed of internet connections. It is an important indicator as it reflects the relative performance and efficiency of internet connections for both downloading data from the internet and uploading data to the internet. A higher ratio indicates faster download speeds compared to upload speeds, while a lower ratio suggests relatively slower download speeds compared to upload speeds.
+
+Analyzing the trend of the download speed/upload speed ratio over time, it is observed that, in general, the ratio tends to decrease. This can be attributed to the growing demand for faster download speeds, which often leads to a greater focus on optimizing download performance. Consequently, the upload speeds may not receive the same level of improvement, resulting in a decline in the ratio.
+
+However, it is worth noting that in some provinces, there has been an increase in the download speed/upload speed ratio from 2019Q1 to 2023Q1. This indicates that these provinces have experienced a relatively larger improvement in download speeds compared to upload speeds. This could be a result of specific investments or upgrades targeting download performance, while upload speeds have seen comparatively lesser enhancements.
+
+These insights suggest that while the overall trend shows a decrease in the download speed/upload speed ratio, there are provinces that have managed to improve this ratio over time. This highlights the importance of considering both download and upload speeds when evaluating internet performance, as well as the need to address the imbalance between the two for a more balanced and efficient internet experience.
+''')
 
 st.markdown('### 1.3. Comparing Provinces')
 st.markdown('Following running bar plot display the ranking of provinces in terms of download or upload speeds.')
@@ -83,7 +97,7 @@ st.markdown('Following running bar plot display the ranking of provinces in term
 o3 = st.selectbox('Select Any Option', ['Upload', 'Download'], index = 1)
 
 def generate_graph3(option):
-    colors = ['crimson']
+    colors = ['darkblue']
     if o3 == 'Upload':
         df_sorted = df.sort_values(['year-quarter', 'avg_u_kbps'], ascending=[True, False])
         fig_3 = px.bar(df_sorted,
@@ -107,8 +121,16 @@ def generate_graph3(option):
 fig_3 = generate_graph3(o3)
 st.plotly_chart(fig_3)
 
-st.markdown('**Insights**')
-st.markdown('will add one paragraph here. Remember: Nunavut has 3 missing data points: 2019Q1, 2019Q2 ans 2020Q3 therefore cannot be plotted inside the running bar plot for some periods.')
+st.markdown('<span style="color:darkgray;">**Insights**</span>', unsafe_allow_html=True)
+st.markdown('''
+British Columbia and New Brunswick consistently rank as the top two provinces in terms of download speed. This suggests that these provinces have made consistent efforts to provide faster download speeds to their residents. On the other hand, the northern provinces and territories, including Yukon, Nunavut, and the Northwest Territories, consistently have the lowest download speeds. This could be due to various factors such as geographical challenges and limited infrastructure in these regions.
+
+In terms of upload speed, a similar pattern is observed based on the location of the provinces. Coastal provinces, such as British Columbia, Newfoundland and Labrador, and Nova Scotia, tend to outperform central provinces in terms of upload speed. Notably, Quebec ranks first in upload speed in 2023Q1, showcasing improvements in its upload infrastructure. Conversely, Nunavut consistently ranks last in upload speed, indicating the need for further investments and enhancements in this region.
+
+The running bar plots for both download and upload speeds reveal clear cluster patterns among provinces. This suggests that there are distinct groups of provinces that share similar internet speed characteristics. Further exploration and clustering analysis could provide valuable insights into the factors influencing these patterns and assist in identifying areas for targeted improvements.
+
+Overall, these insights highlight the varying performance of provinces in terms of internet speeds, with coastal provinces generally demonstrating better performance and northern regions facing challenges in providing high-speed internet access. This information can guide policymakers and stakeholders in identifying areas for infrastructure development and improving internet speeds to bridge the digital divide across different provinces.
+''')
 
 st.markdown('## 2. Attempting an ARIMA Model (Alberta)')
 
@@ -227,4 +249,11 @@ st.markdown('''
 Based on the absence of significant spikes in the autocorrelation function (ACF) and partial autocorrelation function (PACF) after differencing the dataset, it can be concluded that the differenced data does not exhibit any apparent linear relationship or correlation with its past values. This suggests that the differenced series may not possess any significant autoregressive (AR) or moving average (MA) components.
 
 In cases, when the ACF and PACF plots do not show significant autocorrelation patterns, it indicates that an ARIMA (Autoregressive Integrated Moving Average) model is not appropriate for modeling the data. Instead, alternative approaches such as non-linear models, machine learning algorithms, or other techniques may be considered.
+''')
+
+st.markdown('## 3. Conclusion')
+st.markdown('''
+In conclusion, the analysis of upload and download speeds across provinces reveals several key insights. The data indicates an overall improvement in download speeds compared to 2019Q1, with a temporary decrease observed between 2022Q1 and 2022Q2 for most provinces. However, the subsequent data shows a recovery and continued upward trend. Nunavut stands out as the only province with a significant decrease in upload speed, suggesting a specific infrastructure challenge in that region. The download speed/upload speed ratio, which generally decreases over time, highlights the importance of considering both aspects of internet performance. British Columbia and New Brunswick consistently rank highest in download speed, while coastal provinces outperform central provinces in terms of upload speed. Further clustering analysis of provinces based on internet speeds could provide deeper insights for targeted improvements. These findings can inform decision-making processes for infrastructure investments and strategies to enhance internet speeds across provinces, aiming for a more balanced and efficient internet experience nationwide.
+
+The analysis of Alberta's Download Speed Data, on the other hand, reveals an increasing trend and seasonality. The ADF test indicates the presence of non-stationarity in the original data, while differencing the data successfully achieves stationarity. However, the absence of significant autocorrelation patterns suggests that an ARIMA model may not be appropriate. Alternative modeling approaches should be considered to capture the underlying patterns. Overall, this analysis highlights the need for further exploration and alternative modeling techniques for the Alberta Download Speed Data.
 ''')
