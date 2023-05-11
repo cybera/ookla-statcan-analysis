@@ -115,7 +115,8 @@ estimates a sequence of files needs to be run as follows:
 2. `scripts/data/process_raw_ookla_faster.py` -> `data/ookla-canada-tiles/{Canada-Quarterly-Ookla-Tiles-Subset}`
 3. `notebooks/ArbitraryGeomPHHCalc.ipynb` -> `data/processed/geometries/hexagons_w_dissolved_smaller_popctrs.geojson`
 4. `notebooks/LastYearOrBestValue.ipynb` -> `data/processed/statistical_geometries/LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg`
-5. `notebooks/SpeedCriteria EDA.ipynb` -> `data/Gap_Analysis.csv`
+5. `notebooks/SpeedCriteria EDA.ipynb` -> `data/Gap_Analysis.pickle`
+6. `scripts/data/features_table_generation.py` -> `data/feature_table.pickle`
 
 Some of the derived data is slow to load, so notebooks related to generating python "pickle" files are included 
 in the `notebooks/DataProcessing` directory.
