@@ -63,12 +63,18 @@ def devices_speed_check_all_provience(for_visualization_devices):
     return st.write(fig)
     #return st.pyplot(plt,use_container_width=True) 
 
+def loading_file():
+    ifile = bz2.BZ2File("./data/Features.pickle",'rb')
+    for_visualization_devices = pickle.load(ifile) 
+    for_visualization_devices["avg_d_mbps"]=for_visualization_devices["avg_d_kbps"]//1000.0
+    for_visualization_devices["avg_u_mbps"]=for_visualization_devices["avg_u_kbps"]//1000.0
+    return for_visualization_devices
+
 #GAP analysis functions
 bar_graph_for_GAP_analysis(for_visualization)
 generating_map(for_visualization)
 #for_visualization_devices = pd.read_csv("./notebooks/Features.csv")
-ifile = bz2.BZ2File("./data/processed/feature_table.pickle",'rb')
-for_visualization_devices = pickle.load(ifile) 
+for_visualization_devices = loading_file()
 devices_speed_check_all_provience(for_visualization_devices)
 devices_speed_check_alberta(for_visualization_devices)
 
