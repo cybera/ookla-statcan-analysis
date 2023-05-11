@@ -10,7 +10,6 @@ import seaborn as sns
 
 st.write("# Canada Internet")
 st.write("## JT Take Us To The Promised Land (of 50/10)")
-=======
 
 
 st.markdown("<h1 class='custom-header'>1) Exploring the data</h1>", unsafe_allow_html=True)
