@@ -99,3 +99,7 @@ target/
 
 # Streamlit app nominatim search generates a cache folder
 cache
+
+#pickle
+*.pickle
+*pkl
