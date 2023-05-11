@@ -66,7 +66,9 @@ def devices_speed_check_all_provience(for_visualization_devices):
 #GAP analysis functions
 bar_graph_for_GAP_analysis(for_visualization)
 generating_map(for_visualization)
-for_visualization_devices = pd.read_csv("./notebooks/Features.csv")
+#for_visualization_devices = pd.read_csv("./notebooks/Features.csv")
+ifile = bz2.BZ2File("./data/processed/feature_table.pickle",'rb')
+for_visualization_devices = pickle.load(ifile) 
 devices_speed_check_all_provience(for_visualization_devices)
 devices_speed_check_alberta(for_visualization_devices)
 
