@@ -7,12 +7,16 @@ import matplotlib.pyplot as plt
 from src.datasets.loading import statcan, ookla
 import seaborn as sns
 
+
 st.write("# Canada Internet")
 st.write("## JT Take Us To The Promised Land (of 50/10)")
+=======
+
 
 st.markdown("<h1 class='custom-header'>1) Exploring the data</h1>", unsafe_allow_html=True)
 
 #### EDA SECTION
+
 for_visualization = pd.read_csv("./data/Gap_Analysis.csv")
 for_visualization["Percentage_gap"] = (for_visualization["Crt_Size_Total"]/for_visualization["Size_Total"])*100
 for_visualization.sort_values(by="Percentage_gap", ascending=False,inplace=True)
@@ -64,11 +68,8 @@ devices_speed_check_all_provience(for_visualization_devices)
 devices_speed_check_alberta(for_visualization_devices)
 
 
+#### Population-wise Analysis
+
 #### Clustering Section
-st.write("A")
-
-
-
 
 #### Other Activity Of Interest 
-st.write("A")
