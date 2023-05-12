@@ -231,7 +231,7 @@ def download_pop_data():
 def populations():
     if not POP_FILE.exists() and AUTO_DOWNLOAD:
         download_pop_data()
-    return pd.read_csv(POP_FILE)
+    return pd.read_csv(POP_FILE, low_memory=False)
 
 
 def _total_pops(id_name, level):
