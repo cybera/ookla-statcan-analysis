@@ -64,31 +64,31 @@ colTransformer = compose.ColumnTransformer(
     #+ [(f"{y}_stdscaler", preprocessing.StandardScaler(), [y]) for y in target_vars]
 )
 
-sse = {}
-for k in range(1, 9):
-    clustering = KMeans(n_clusters=k)
+# sse = {}
+# for k in range(1, 9):
+#     clustering = KMeans(n_clusters=k)
 
 
-    clustering_pipe = pipeline.Pipeline([
-        ('preprocess',colTransformer),
-        ('clustering', clustering)
-    ])
-    clustering_pipe.fit(cluster_data)
+#     clustering_pipe = pipeline.Pipeline([
+#         ('preprocess',colTransformer),
+#         ('clustering', clustering)
+#     ])
+#     clustering_pipe.fit(cluster_data)
 
-    sse[k] = clustering.inertia_
+#     sse[k] = clustering.inertia_
 
-    # plot SSE vs. k with elbow point
-plt.figure()
-plt.plot(list(sse.keys()), list(sse.values()))
-plt.xlabel('Number of clusters, k')
-plt.ylabel('SSE')
-plt.vlines(5, ymin=min(sse.values()), ymax=max(sse.values()), linestyle='--') 
-st.pyplot()
+#     # plot SSE vs. k with elbow point
+# plt.figure()
+# plt.plot(list(sse.keys()), list(sse.values()))
+# plt.xlabel('Number of clusters, k')
+# plt.ylabel('SSE')
+# plt.vlines(5, ymin=min(sse.values()), ymax=max(sse.values()), linestyle='--') 
+# st.pyplot()
 
-st.markdown('We see that there is a roughly linear decrease in the SSE and no clear elbow is seen. Let us choose to use 5 as the best k for K-Means clustering. ')
+# st.markdown('We see that there is a roughly linear decrease in the SSE and no clear elbow is seen. Let us choose to use 5 as the best k for K-Means clustering. ')
 
 
-st.markdown('### Clustering results')
+# st.markdown('### Clustering results')
 
 np.random.seed(7)
 clustering = KMeans(n_clusters=5)
@@ -140,14 +140,20 @@ st.markdown("""
 """)
 
 
-
 def threshold_data(threshold=400000):
+    np.random.seed(111)
     cluster_data['cluster'] = cluster_data.loc[:, 'kmeans_cluster_label']
     cluster_data.loc[cluster_data['avg_d_kbps'] < threshold, 'cluster'] = 5
-    scatter_3d(cluster_data.sample(n=int(0.1*len(cluster_data))), x='CDTYPE', y='CSDTYPE', z='avg_d_kbps', color='cluster')
+    scatter_3d(cluster_data.sample(n=int(0.4*len(cluster_data))), x='CDTYPE', y='CSDTYPE', z='avg_d_kbps', color='cluster')
     
     
 threshold = st.slider("Select Threshold",  100000, 800000, 400000, 50000 )    
 threshold_data(int(threshold))
 
-st.markdown("Note: We also experimented with other clustering algorithms such as hierarchical clustering, DBSCAN, and OPTICS. However, their results have been omitted as K-means provided the most interpretable results")
+st.markdown("""" We can collect all areas in the new (yellow) cluster and focus on them for future infrastructure development. 
+
+
+
+
+
+Note: We also experimented with other clustering algorithms such as hierarchical clustering, DBSCAN, and OPTICS. However, their results have been omitted as K-means provided the most interpretable results""")
