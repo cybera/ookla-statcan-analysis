@@ -21,12 +21,13 @@ def load_data_csv(file):
 
 # Page 1: About the dataset
 def about_data_page(data):
-        # Add custom CSS styles
+    # Add custom CSS styles
     st.markdown("""
     <style>
         .custom-header {
-            color: #4169E1;
+            color: #4d4d99;
             font-weight: bold;
+            text-align: left;
         }
 
         .custom-header2 {
@@ -46,15 +47,32 @@ def about_data_page(data):
              More details about the dataset can be obtained from https://registry.opendata.aws/speedtest-global-performance")
     st.dataframe(data.drop(['geometry'], axis=1), width=900, height=300)
 
-    st.subheader("Summary Statistics of the Dataset")
+    st.markdown("<h3 class='custom-header2'>Summary Statistics of the Dataset</h3>", unsafe_allow_html=True)
+    # st.subheader("Summary Statistics of the Dataset")
     st.write("To understand the distribution of the dataset, we looked at the summary statistics of the numerical columns of the dataset as follows:")
     st.write(data.describe())
 
 
 # Page 2: Create and display the plot
 def plot_page(data):
-    st.header("Data Visualization")
-    st.subheader("Please select the data research topic you would like to visualize")
+    # Add custom CSS styles
+    st.markdown("""
+    <style>
+        .custom-header2 {
+            color: #000080;
+            # font-weight: bold;
+        }
+        .custom-text {
+            color: #388e3c;
+            font-style: italic;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h2 class='custom-header2'>Data Visualization</h2>", unsafe_allow_html=True)
+    # st.header("Data Visualization")
+    st.markdown("<h4 class='custom-text'>Please select the data research topic you would like to visualize:</h4>", unsafe_allow_html=True)
+    # st.subheader("Please select the data research topic you would like to visualize")
 
     def figure_one(data):
         sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
@@ -176,7 +194,7 @@ def plot_page(data):
         figure_six(data)
 
 # Page 3: Layout Examples
-def layout_examples_page():
+def machine_learning_page():
     st.header("Streamlit Layout Examples \n Document: https://docs.streamlit.io/library/api-reference/layout")
 
     st.subheader("Columns")
@@ -208,39 +226,7 @@ def layout_examples_page():
         st.write("This is a container.")
         st.button("Button inside Container")
     st.write('This is outside a container')
-    # Page 4: Styling Examples
-def styling_examples_page():
-    # Add custom CSS styles
-    st.markdown("""
-    <style>
-        .custom-header {
-            color: #4a148c;
-            font-weight: bold;
-        }
-        .custom-text {
-            color: #388e3c;
-            font-style: italic;
-        }
-        .custom-button button {
-            background-color: #ff9800;
-            border: 2px solid #f57c00;
-            color: white;
-            font-weight: bold;
-            border-radius: 5px;
-        }
-        .custom-button:hover button {
-            background-color: #f57c00;
-            border-color: #ff9800;
-        }
-    </style>
-    """, unsafe_allow_html=True)
 
-    st.markdown("<h1 class='custom-header'>Custom Styled Header</h1>", unsafe_allow_html=True)
-    st.markdown("<p class='custom-text'>This is custom styled text.</p>", unsafe_allow_html=True)
-    
-    st.markdown("<div class='custom-button'>", unsafe_allow_html=True)
-    st.button("Custom Styled Button")
-    st.markdown("</div>", unsafe_allow_html=True)
 
 def main():
     # Read in the dataset
@@ -260,8 +246,7 @@ def main():
     pages = {
         "About the Data": about_data_page,
         "Data Visualization": plot_page,
-        "Layout Examples": layout_examples_page,
-        "Styling Examples": styling_examples_page,
+        "Machine Learning Output": machine_learning_page,
     }
 
     # Show a selection box in the sidebar to choose a page
