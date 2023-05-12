@@ -1,10 +1,12 @@
 import streamlit as st
+import numpy as np
 import pandas as pd
 import seaborn as sns
 import plotly.express as px
 import geopandas as gp
 import src.config
 import matplotlib.pyplot as plt
+from PIL import Image
 
 
 # Function to load the dataset
@@ -17,6 +19,12 @@ def load_data(url):
 def load_data_csv(file):
     data = pd.read_csv(file)
     return data
+
+
+
+
+  
+
 
 
 # Page 1: About the dataset
@@ -83,8 +91,8 @@ def plot_page(data):
                                     orient = 'h')
                                     #showfliers = False)
 
-        plt.xlabel('Avg. Download in Kilobytes')
-        plt.ylabel('Population Centre Type')
+        plt.xlabel('Avg. Download in kbps')
+        plt.ylabel('Population Centre Class')
         plt.yticks([0, 1, 2], ['Small P. Centre', 'Medium P. Centre', 'Large P. Centre'])
         plt.title('Behavior of the Average Download Speed in 2019 for the defined Population Centres')
         plt.axvline(50000, linestyle='--')
@@ -100,8 +108,8 @@ def plot_page(data):
                                             palette="deep")
 
         plt.xlabel('Population Density in 2019')
-        plt.ylabel('Avg. Download in Kilobytes')
-        plt.legend(title='Population Centre Type', loc='upper right')
+        plt.ylabel('Avg. Download in kbps')
+        plt.legend(title='Population Centre Class', loc='upper right')
         plt.title('Average Download Speed in contrast to the population density of 2019 for the defined Population Centres')
         plt.axhline(50000, linestyle='--')
         st.pyplot(g.figure)
@@ -117,8 +125,8 @@ def plot_page(data):
                                             orient = 'h')
                                             #showfliers = False)
 
-        plt.xlabel('Avg. Download in Kilobytes')
-        plt.ylabel('Population Centre Type')
+        plt.xlabel('Avg. Download in kbps')
+        plt.ylabel('Population Centre Class')
         plt.title('Behavior of the Average Download Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas')
         plt.axvline(50000, linestyle='--')
         st.pyplot(g.figure)
@@ -132,11 +140,11 @@ def plot_page(data):
                                     orient = 'h')
                                     #showfliers = False)
 
-        plt.xlabel('Avg. Upload in Kilobytes')
-        plt.ylabel('Population Centre Type')
+        plt.xlabel('Avg. Upload in kbps')
+        plt.ylabel('Population Centre Class')
         plt.yticks([0, 1, 2], ['Small P. Centre', 'Medium P. Centre', 'Large P. Centre'])
         plt.title('Behavior of the Average Upload Speed in 2019 for the defined Population Centres')
-        plt.axvline(50000, linestyle='--')
+        plt.axvline(10000, linestyle='--')
         st.pyplot(g.figure)
 
     def figure_five(data):
@@ -149,10 +157,10 @@ def plot_page(data):
                                             palette="deep")
 
         plt.xlabel('Population Density in 2019')
-        plt.ylabel('Avg. Upload in Kilobytes')
-        plt.legend(title='Population Centre Type', loc='upper right')
+        plt.ylabel('Avg. Upload in kbps')
+        plt.legend(title='Population Centre Class', loc='upper right')
         plt.title('Average Upload Speed in contrast to the population density of 2019 for the defined Population Centres')
-        plt.axhline(50000, linestyle='--')
+        plt.axhline(10000, linestyle='--')
         st.pyplot(g.figure)
     
     def figure_six(data):
@@ -166,10 +174,10 @@ def plot_page(data):
                                             orient = 'h')
                                             #showfliers = False)
 
-        plt.xlabel('Avg. Upload in Kilobytes')
-        plt.ylabel('Population Centre Type')
+        plt.xlabel('Avg. Upload in kbps')
+        plt.ylabel('Population Centre Class')
         plt.title('Behavior of the Average Upload Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas')
-        plt.axvline(50000, linestyle='--')
+        plt.axvline(10000, linestyle='--')
         st.pyplot(g.figure)    
     
     figure_titles = ['Average Download Speed in contrast to the population density of 2019 for the defined Population Centres'\
@@ -186,7 +194,7 @@ def plot_page(data):
         figure_two(data)
     elif selected_indicator == 'Behavior of the Average Download Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas':
         figure_three(data)
-    if selected_indicator == 'Behavior of the Average Upload Speed in 2019 for the defined Population Centres':
+    elif selected_indicator == 'Behavior of the Average Upload Speed in 2019 for the defined Population Centres':
         figure_four(data)
     elif selected_indicator == 'Average Upload Speed in contrast to the population density of 2019 for the defined Population Centres':
         figure_five(data)
@@ -195,37 +203,44 @@ def plot_page(data):
 
 # Page 3: Layout Examples
 def machine_learning_page():
-    st.header("Streamlit Layout Examples \n Document: https://docs.streamlit.io/library/api-reference/layout")
+        # Machine Learning data
+    output_ml_dir = src.config.DATA_DIRECTORY / "images"
+    output_ml_dir.mkdir(exist_ok=True)
+    # Add custom CSS styles
+    st.markdown("""
+    <style>
+        .custom-header2 {
+            color: #000080;
+            # font-weight: bold;
+        }
+        .custom-text {
+            color: #388e3c;
+            font-style: italic;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-    st.subheader("Columns")
-    st.write("You can create columns in Streamlit using `st.columns()`. This allows you to arrange widgets or content side by side.")
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.write("Column 1")
-        st.button("Button 1")
-    with col2:
-        st.write("Column 2")
-        st.button("Button 2")
-    with col3:
-        st.write("Column 3")
-        st.button("Button 3")
+    st.markdown("<h2 class='custom-header2'>Machine Learning Outputs</h2>", unsafe_allow_html=True)
+    st.markdown("<h4 class='custom-text'>Please select the machine learning output to visualize:</h4>", unsafe_allow_html=True)
 
-    st.subheader("Expander")
-    st.write("You can create expanders in Streamlit using `st.xpander()`. This allows you to show or hide content in a collapsible section.")
-    
-    with st.expander("Expandable Section"):
-        st.write("This is an expandable section.")
-        st.button("Button inside Expander")
 
-    st.subheader("Container")
-    st.write("You can create containers in Streamlit using `st.container()`. This allows you to group and organize content or widgets.")
-    
-    
-    with st.container():
-        st.write("This is a container.")
-        st.button("Button inside Container")
-    st.write('This is outside a container')
+    figure_titles = ['Download Speed Prediction'\
+                     , 'Predicted vs Measured Download Speed'\
+                     , 'Important Coefficients for the Model Prediction']
+    selected_indicator = st.selectbox("Choose indicator", options=figure_titles, index=0)
+
+    if selected_indicator == 'Download Speed Prediction':
+        output_ml_data = "predicted_output.png"
+        image = Image.open(output_ml_dir / output_ml_data)
+        st.image(image, caption='Download Speed Prediction')
+    elif selected_indicator == 'Predicted vs Measured Download Speed':
+        output_ml_data = "predicted.png"
+        image = Image.open(output_ml_dir / output_ml_data)
+        st.image(image, caption='Predicted vs Measured Download Speed')
+    elif selected_indicator == 'Important Coefficients for the Model Prediction':
+        output_ml_data = "coefficient.png"
+        image = Image.open(output_ml_dir / output_ml_data)
+        st.image(image, caption='Important Coefficients for the Model Prediction')
 
 
 def main():
@@ -234,8 +249,9 @@ def main():
     output_dir = src.config.DATA_DIRECTORY / "processed" / "statistical_geometries"
     output_dir.mkdir(exist_ok=True)
 
+    # 2019 dataset
     output_2019_data = "Final.csv"
-    output_2019_dir = src.config.DATA_DIRECTORY 
+    output_2019_dir = src.config.DATA_DIRECTORY / "hackathon"
     output_2019_dir.mkdir(exist_ok=True)
    
     data = load_data(output_dir / output_name)
@@ -258,6 +274,8 @@ def main():
         pages[selected_page](data)
     elif selected_page in ["Data Visualization"]:
         pages[selected_page](data_2019)
+    elif selected_page in ["Machine Learning Output"]:
+        pages[selected_page]()
     else:
         pages[selected_page]()
 
