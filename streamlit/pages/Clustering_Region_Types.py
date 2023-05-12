@@ -64,31 +64,31 @@ colTransformer = compose.ColumnTransformer(
     #+ [(f"{y}_stdscaler", preprocessing.StandardScaler(), [y]) for y in target_vars]
 )
 
-# sse = {}
-# for k in range(1, 9):
-#     clustering = KMeans(n_clusters=k)
+sse = {}
+for k in range(1, 9):
+    clustering = KMeans(n_clusters=k)
 
 
-#     clustering_pipe = pipeline.Pipeline([
-#         ('preprocess',colTransformer),
-#         ('clustering', clustering)
-#     ])
-#     clustering_pipe.fit(cluster_data)
+    clustering_pipe = pipeline.Pipeline([
+        ('preprocess',colTransformer),
+        ('clustering', clustering)
+    ])
+    clustering_pipe.fit(cluster_data)
 
-#     sse[k] = clustering.inertia_
+    sse[k] = clustering.inertia_
 
-#     # plot SSE vs. k with elbow point
-# plt.figure()
-# plt.plot(list(sse.keys()), list(sse.values()))
-# plt.xlabel('Number of clusters, k')
-# plt.ylabel('SSE')
-# plt.vlines(5, ymin=min(sse.values()), ymax=max(sse.values()), linestyle='--') 
-# st.pyplot()
+    # plot SSE vs. k with elbow point
+plt.figure()
+plt.plot(list(sse.keys()), list(sse.values()))
+plt.xlabel('Number of clusters, k')
+plt.ylabel('SSE')
+plt.vlines(5, ymin=min(sse.values()), ymax=max(sse.values()), linestyle='--') 
+st.pyplot()
 
-# st.markdown('We see that there is a roughly linear decrease in the SSE and no clear elbow is seen. Let us choose to use 5 as the best k for K-Means clustering. ')
+st.markdown('We see that there is a roughly linear decrease in the SSE and no clear elbow is seen. Let us choose to use 5 as the best k for K-Means clustering. ')
 
 
-# st.markdown('### Clustering results')
+st.markdown('### Clustering results')
 
 np.random.seed(7)
 clustering = KMeans(n_clusters=5)
