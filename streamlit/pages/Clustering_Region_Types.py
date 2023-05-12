@@ -150,3 +150,4 @@ def threshold_data(threshold=400000):
 threshold = st.slider("Select Threshold",  100000, 800000, 400000, 50000 )    
 threshold_data(int(threshold))
 
+st.markdown("Note: We also experimented with other clustering algorithms such as hierarchical clustering, DBSCAN, and OPTICS. However, their results have been omitted as K-means provided the most interpretable results")
