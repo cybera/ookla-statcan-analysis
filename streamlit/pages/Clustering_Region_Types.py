@@ -128,8 +128,6 @@ scatter_3d(cluster_data.sample(n=int(0.5*len(cluster_data))), x='CDTYPE', y='CSD
 st.markdown("""
 #### Interpretations
 
-- The orange cluster represents a large number of areas all have weak connectivity. This cluster should likely receive the most attention for policy direction.
-
 - Census subdivisions of Self-government, Nisga'a land, Settlements, Municipality of Canton Unis have weak connectivity and should be a focus of future work. 
 
 - There is a huge variation in all CD types. This indicates that no matter what type of area we consider (such as rural/urban areas) there are both areas with high speeds and low speeds. We confirm the findings of regression analysis that area type is not a very good indicator of internet connectivity.  
