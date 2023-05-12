@@ -4,6 +4,7 @@ import seaborn as sns
 import plotly.express as px
 import geopandas as gp
 import src.config
+import matplotlib.pyplot as plt
 
 
 # Function to load the dataset
@@ -12,12 +13,34 @@ def load_data(url):
     data = gp.read_file(url, driver="GPKG")
     return data
 
+@st.cache_data
+def load_data_csv(file):
+    data = pd.read_csv(file)
+    return data
+
 
 # Page 1: About the dataset
 def about_data_page(data):
-    st.header("Analysis of Download and Upload Internet Speed in Canadian Provinces")
+        # Add custom CSS styles
+    st.markdown("""
+    <style>
+        .custom-header {
+            color: #4169E1;
+            font-weight: bold;
+        }
 
-    st.subheader("Dataset Description")
+        .custom-header2 {
+            color: #000080;
+            # font-weight: bold;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<h1 class='custom-header'>Analysis of Download and Upload Internet Speed in Canadian Provinces</h1>", unsafe_allow_html=True)
+    # st.header("Analysis of Download and Upload Internet Speed in Canadian Provinces")
+
+    st.markdown("<h3 class='custom-header2'>Dataset Description</h3>", unsafe_allow_html=True)
+    # st.subheader("Dataset Description")
     st.write("This dataset provides a comprehensive view of the upload speed, download speed, and latency for different provinces across Canada.\
              The data was collected using the Speedtest by Ookla applications for Android and IOS and averaged for each tile. \
              More details about the dataset can be obtained from https://registry.opendata.aws/speedtest-global-performance")
@@ -30,17 +53,127 @@ def about_data_page(data):
 
 # Page 2: Create and display the plot
 def plot_page(data):
-    fig = px.scatter(
-    data,
-    x="avg_d_kbps",
-    y="connections",
-    color="PRCODE",
-    hover_name="PCCLASS",
-    log_x=True,
-    size_max=60,
-)
+    st.header("Data Visualization")
+    st.subheader("Please select the data research topic you would like to visualize")
+
+    def figure_one(data):
+        sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
+        sns.set(rc={'figure.figsize':(11.7,8.27)})
+
+        g = sns.boxplot(data=data, x="avg_d_kbps", 
+                                    y="PCCLASS",  
+                                    orient = 'h')
+                                    #showfliers = False)
+
+        plt.xlabel('Avg. Download in Kilobytes')
+        plt.ylabel('Population Centre Type')
+        plt.yticks([0, 1, 2], ['Small P. Centre', 'Medium P. Centre', 'Large P. Centre'])
+        plt.title('Behavior of the Average Download Speed in 2019 for the defined Population Centres')
+        plt.axvline(50000, linestyle='--')
+        st.pyplot(g.figure)
+
+    def figure_two(data):
+        sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
+        sns.set(rc={'figure.figsize':(11.7,8.27)})
+
+        g = sns.scatterplot(data=data, x="POP_DENSITY", 
+                                            y="avg_d_kbps", 
+                                            hue="PCCLASS", 
+                                            palette="deep")
+
+        plt.xlabel('Population Density in 2019')
+        plt.ylabel('Avg. Download in Kilobytes')
+        plt.legend(title='Population Centre Type', loc='upper right')
+        plt.title('Average Download Speed in contrast to the population density of 2019 for the defined Population Centres')
+        plt.axhline(50000, linestyle='--')
+        st.pyplot(g.figure)
     
-    st.plotly_chart(fig, theme=None, use_container_width=True)
+    def figure_three(data):
+        # Let's convert the NULL values into "Outside"
+        data['PCCLASS'].fillna("Outside", inplace = True)
+        sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
+        sns.set(rc={'figure.figsize':(11.7,8.27)})
+
+        g = sns.boxplot(data=data, x="avg_d_kbps", 
+                                            y="PCCLASS",  
+                                            orient = 'h')
+                                            #showfliers = False)
+
+        plt.xlabel('Avg. Download in Kilobytes')
+        plt.ylabel('Population Centre Type')
+        plt.title('Behavior of the Average Download Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas')
+        plt.axvline(50000, linestyle='--')
+        st.pyplot(g.figure)
+
+    def figure_four(data):
+        sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
+        sns.set(rc={'figure.figsize':(11.7,8.27)})
+
+        g = sns.boxplot(data=data, x="avg_u_kbps", 
+                                    y="PCCLASS",  
+                                    orient = 'h')
+                                    #showfliers = False)
+
+        plt.xlabel('Avg. Upload in Kilobytes')
+        plt.ylabel('Population Centre Type')
+        plt.yticks([0, 1, 2], ['Small P. Centre', 'Medium P. Centre', 'Large P. Centre'])
+        plt.title('Behavior of the Average Upload Speed in 2019 for the defined Population Centres')
+        plt.axvline(50000, linestyle='--')
+        st.pyplot(g.figure)
+
+    def figure_five(data):
+        sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
+        sns.set(rc={'figure.figsize':(11.7,8.27)})
+
+        g = sns.scatterplot(data=data, x="POP_DENSITY", 
+                                            y="avg_u_kbps", 
+                                            hue="PCCLASS", 
+                                            palette="deep")
+
+        plt.xlabel('Population Density in 2019')
+        plt.ylabel('Avg. Upload in Kilobytes')
+        plt.legend(title='Population Centre Type', loc='upper right')
+        plt.title('Average Upload Speed in contrast to the population density of 2019 for the defined Population Centres')
+        plt.axhline(50000, linestyle='--')
+        st.pyplot(g.figure)
+    
+    def figure_six(data):
+        # Let's convert the NULL values into "Outside"
+        data['PCCLASS'].fillna("Outside", inplace = True)
+        sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
+        sns.set(rc={'figure.figsize':(11.7,8.27)})
+
+        g = sns.boxplot(data=data, x="avg_u_kbps", 
+                                            y="PCCLASS",  
+                                            orient = 'h')
+                                            #showfliers = False)
+
+        plt.xlabel('Avg. Upload in Kilobytes')
+        plt.ylabel('Population Centre Type')
+        plt.title('Behavior of the Average Upload Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas')
+        plt.axvline(50000, linestyle='--')
+        st.pyplot(g.figure)    
+    
+    figure_titles = ['Average Download Speed in contrast to the population density of 2019 for the defined Population Centres'\
+                     , 'Average Upload Speed in contrast to the population density of 2019 for the defined Population Centres'\
+                     , 'Behavior of the Average Download Speed in 2019 for the defined Population Centres'\
+                     , 'Behavior of the Average Upload Speed in 2019 for the defined Population Centres'\
+                     , 'Behavior of the Average Download Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas'\
+                     , 'Behavior of the Average Upload Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas']
+    selected_indicator = st.selectbox("Choose indicator", options=figure_titles, index=0)
+
+    if selected_indicator == 'Behavior of the Average Download Speed in 2019 for the defined Population Centres':
+        figure_one(data)
+    elif selected_indicator == 'Average Download Speed in contrast to the population density of 2019 for the defined Population Centres':
+        figure_two(data)
+    elif selected_indicator == 'Behavior of the Average Download Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas':
+        figure_three(data)
+    if selected_indicator == 'Behavior of the Average Upload Speed in 2019 for the defined Population Centres':
+        figure_four(data)
+    elif selected_indicator == 'Average Upload Speed in contrast to the population density of 2019 for the defined Population Centres':
+        figure_five(data)
+    elif selected_indicator == 'Behavior of the Average Upload Speed in 2019 for all areas - Population Centres vs. Rural/Outside areas':
+        figure_six(data)
 
 # Page 3: Layout Examples
 def layout_examples_page():
@@ -114,8 +247,14 @@ def main():
     output_name = "LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg"
     output_dir = src.config.DATA_DIRECTORY / "processed" / "statistical_geometries"
     output_dir.mkdir(exist_ok=True)
+
+    output_2019_data = "Final.csv"
+    output_2019_dir = src.config.DATA_DIRECTORY 
+    output_2019_dir.mkdir(exist_ok=True)
    
     data = load_data(output_dir / output_name)
+
+    data_2019 = load_data_csv(output_2019_dir / output_2019_data)
 
     # Define pages and their corresponding functions
     pages = {
@@ -130,52 +269,12 @@ def main():
     selected_page = st.sidebar.radio("Go to", list(pages.keys()))
 
     # Call the corresponding function for the selected page
-    if selected_page in ["About the Data", "Data Visualization"]:
+    if selected_page in ["About the Data"]:
         pages[selected_page](data)
+    elif selected_page in ["Data Visualization"]:
+        pages[selected_page](data_2019)
     else:
         pages[selected_page]()
 
 if __name__ == "__main__":
     main()
-
-
-
-
-# def plot_indicator(data, selected_province, selected_connection, upload_speed):
-#         filtered_data = data[(data['PRCODE'].isin(selected_province)) &
-#                             (data['connections'] == selected_connection) &
-#                             (data['avg_u_kbps'] == upload_speed)]
-#         speed_type = ["Download Speed", "Upload Speed"]
-#         selection = ""
-#         if speed_type == "Download Speed":
-#             selection == data['avg_d_kbps']
-#         else:
-#             selection == data['avg_u_kbps']
-#         fig = sns.scatterplot(filtered_data,  x=selection, color='PRCODE',
-#                     title=f"{selected_connection} for {', '.join(selected_province)} over time")
-#         # fig = px.line(filtered_data, x=selection, color='PRCODE',
-#         #             title=f"{selected_connection} for {', '.join(selected_province)} over time")
-
-#         return fig
-
-#     st.header("Interactive Visualization \n Ducoments:https://docs.streamlit.io/library/api-reference/charts")
-#     st.subheader("Select countries, indicator, and year range to plot over time")
-#     all_provinces = data['PRCODE'].unique()
-#     all_connections = data['connections'].unique()
-#     download_speed = data['avg_d_kbps']
-#     upload_speed = data['avg_u_kbps']
-#     filtered_data = data['PRCODE', 'connections', 'avg_u_kbps']
-#     # speed_type = ["Download Speed", "Upload Speed"]
-
-#     selected_province = st.multiselect("Choose province", options=all_provinces, default=['AB'])
-#     selected_connection = st.multiselect("Choose connection type", options=all_connections, default=['fixed'])
-#     # selected_speed = st.selectbox("Indicate internet speed", options= speed_type, index=0)
-
-#     # min_year, max_year = int(data['Year'].min()), int(data['Year'].max())
-#     # upload_speed = st.slider("Choose year range")
-
-#     if selected_province:
-#         fig = plot_indicator(filtered_data, selected_province, selected_connection, upload_speed)
-#         st.plotly_chart(fig)
-#     else:
-#         st.write("No countries selected. Please select at least one country to plot th= selected indicator over time.")
