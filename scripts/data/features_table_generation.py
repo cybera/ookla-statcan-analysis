@@ -65,8 +65,9 @@ def generate_data():
     col_subset = [pkey] + categorical_labels + numerical_vars + target_vars
     features_table.loc[:,col_subset].set_index('quadkey')
 
-    ofile = bz2.BZ2File("./data/feature_table.pickle",'wb')
+    ofile = bz2.BZ2File("./data/Features.pickle",'wb')
     pickle.dump(features_table,ofile)
+    ofile.close()
     # For loading the pickle file
     # ifile = bz2.BZ2File("./data/processed/feature_table.pickle",'rb')
     # feature_table = pickle.load(ifile) 
