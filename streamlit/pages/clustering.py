@@ -55,8 +55,8 @@ else:
     pr_table=subset_province(option,features_table)
 X=preparedata(calc_vars,cat_vars,target_vars,df=pr_table)
 k=best_k(20,X,'k-means++',100,10,42)
-centers=AddCluster(k=k,df=X,original_df=pr_table)
-
+centers=AddCluster(k=k,df=X)
+pr_table['cluster']=X['cluster']
 
 colorsmap=zip(range(0,20),colors[:20])
 colorsmap=dict(colorsmap)
@@ -89,7 +89,7 @@ st.markdown(
     we can only get a partial ituition of which of the areas can be grouped together. For those with sufficient data points, for example, Alberta, 
     is obviously grouped in to eastern and western parts, which indicates that we might want to consider to apply different strategies to these two 
     areas. 
-    Similarly, we can conduct analysis on other area's maps, such as 
+    Similarly, we can conduct analysis on other area's maps, such as Ontario or countrywise.
 
     """
 )
