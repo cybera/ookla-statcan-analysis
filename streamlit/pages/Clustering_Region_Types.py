@@ -20,7 +20,6 @@ from sklearn.model_selection import GridSearchCV
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 
-st.write('Hello')
 
 # st.write( subprocess.run(['ls', '-a'], stdout=subprocess.PIPE).stdout.decode())
 pkey = 'quadkey'
@@ -53,7 +52,12 @@ cluster_data = features_table[cluster_features + target_vars]
 
 st.markdown("# Clustering Data")
 
-st.write("Choosing a k-value for K-means Clustering")
+st.markdown("""
+## Motivation 
+Earlier analysis had performed regression analysis to identify correlations between the various features in the data and the target variables viz. download speeds and upload speeds. One of the features in the data was the type of census division or subdivision that an area belongs to. However, the regression analysis was not very interpretable and did not help to identify census division types that need attention. Hence, we perform clustering to find out such division types that should be the focus of future policies. 
+""")
+
+st.markdown("### Choosing a k-value for K-means Clustering")
 colTransformer = compose.ColumnTransformer(
     [(f"{cat}",preprocessing.OneHotEncoder(),[cat]) for cat in set(categorical_labels) & set(cluster_features)] \
     + [(f"{num}", preprocessing.StandardScaler(), [num]) for num in set(numerical_vars) & set(cluster_features)] 
@@ -81,9 +85,10 @@ plt.ylabel('SSE')
 plt.vlines(5, ymin=min(sse.values()), ymax=max(sse.values()), linestyle='--') 
 st.pyplot()
 
+st.markdown('We see that there is a roughly linear decrease in the SSE and no clear elbow is seen. Let us choose to use 5 as the best k for K-Means clustering. ')
 
 
-st.write('Clustering results')
+st.markdown('### Clustering results')
 
 np.random.seed(7)
 clustering = KMeans(n_clusters=5)
@@ -129,7 +134,7 @@ st.markdown("""
 
 - There is a huge variation in all CD types. This indicates that no matter what type of area we consider (such as rural/urban areas) there are both areas with high speeds and low speeds. We confirm the findings of regression analysis that area type is not a very good indicator of internet connectivity.  
 
-- We can naturally divide the data points into two layers at the cutoff point 450k kbps. Areas below this can be given special attention. 
+- We can naturally divide the data points into two layers at the cutoff point 400k kbps. Areas below this can be given special attention. 
 
 
 """)
