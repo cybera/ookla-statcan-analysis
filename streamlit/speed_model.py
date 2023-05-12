@@ -10,11 +10,9 @@ import seaborn as sns
 import pickle
 import bz2
 
-st.write("# Canada Internet")
-st.write("## JT Take Us To The Promised Land (of 50/10)")
+st.write("# Canada Internet current status for 50/10 internet speed")
+st.write("## Exploratory Data Analysis(EDA):")
 
-
-st.markdown("<h1 class='custom-header'>1) Exploring the data</h1>", unsafe_allow_html=True)
 
 #### EDA SECTION
 
@@ -34,12 +32,6 @@ def bar_graph_for_GAP_analysis(for_visualization):
     )
     fig.update_yaxes(range=[0, 100])
     st.plotly_chart(fig)
-
-    st.markdown(
-        """
-    We are comparing the gap between expected 100% Canadians having >50Mbps Download & >10Mbps uplod speed but the graph show how much % of localities lag the speed expected.
-    """
-    )
 
 def generating_map(for_visualization):
     for_visualization_map = for_visualization.rename({'Proviences': 'PRNAME'}, axis=1)
@@ -71,13 +63,32 @@ def loading_file():
     return for_visualization_devices
 
 #GAP analysis functions
+for_visualization_devices = loading_file()
+
+#EDA - NULL value
+st.markdown("<h1 class='custom-header'>- Cleaning the data</h1>", unsafe_allow_html=True)
+st.write(for_visualization_devices.isna().sum())
+st.markdown("<h3 class='custom-header'><u>Insight:</u>As there are 11 columns where Null values are observed, it will be treated using mean/dropping of row based on the analysis of numeraic/categorical data</h3>", unsafe_allow_html=True)
+
+#EDA - 5 step summary
+st.markdown("<h1 class='custom-header'>- 5 number summary of the data</h1>", unsafe_allow_html=True)
+st.write(for_visualization_devices.describe())
+st.markdown("<h3 class='custom-header'><u>Insight:</u> It is quiet surprising that the '75%' of the locallity using on an average 7 devices while the maximum is at ~1500 devices</h3>", unsafe_allow_html=True)
+
+#Q-1
+st.markdown("<h1 class='custom-header'>1) Which provinces needs significant improvement in terms of the 50/10 internet speed criteria?</h1>", unsafe_allow_html=True)
+#st.markdown(for_visualization_devices.describe())
 bar_graph_for_GAP_analysis(for_visualization)
 generating_map(for_visualization)
+st.markdown("<h3 class='custom-header'><u>Conclusion:</u>  It is clear from the above graphs that Nunavut, Yukong needs at most improvement in their current 50/10 internet speeds.</h1>", unsafe_allow_html=True)
+
+#Q-2
+st.markdown("<h1 class='custom-header'>2) Relation between internet speed vs devices</h1>", unsafe_allow_html=True)
+st.markdown("<h4 class='custom-header'>We have a pre assumed conception that as the number of devices increases the internet speed in Download/Upload will decrease, thus to investiage we ploted a heatmap,</h4>", unsafe_allow_html=True)
 #for_visualization_devices = pd.read_csv("./notebooks/Features.csv")
-for_visualization_devices = loading_file()
 devices_speed_check_all_provience(for_visualization_devices)
 devices_speed_check_alberta(for_visualization_devices)
-
+st.markdown("<h3 class='custom-header'><u>Conclusion:</u>  Visualization clearly does not stand true to the preconcieved assumption. </h1>", unsafe_allow_html=True)
 
 #### Population-wise Analysis
 
