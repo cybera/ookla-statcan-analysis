@@ -86,7 +86,7 @@ st.markdown("""
 
 - Areas with very high population or population density do not get very high speeds. This may indicate that high population density causes increased interference or division of bandwidth. 
 
-- Download speeds converge to a point around 200000 kbps as population densiity increases. 
+- Download speeds converge to a point around 200000 kbps as population density increases. 
 
 
 - Data is scattered homogeneously around the origin 
