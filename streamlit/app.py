@@ -1,3 +1,4 @@
+import pickle
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
@@ -15,11 +16,17 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # memoize boundary loading function
-statcan.boundary = st.experimental_singleton(statcan.boundary)
+statcan.boundary = st.cache_resource(statcan.boundary)
 
 output_name = "LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg"
 output_dir = src.config.DATA_DIRECTORY / "processed" / "statistical_geometries"
 output_dir.mkdir(exist_ok=True)
+
+output_pickle_name = (
+    "LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.pickle"
+)
+output_dir = src.config.DATA_DIRECTORY / "processed" / "statistical_geometries"
+
 
 CRS = "EPSG:4326"
 
@@ -55,11 +62,14 @@ def convert_kbps_to_mbps(table, copy=False):
     return table
 
 
-@st.experimental_singleton
+@st.cache_resource
 def load_speed_data():
     print("Loading speed data...")
 
-    speed_data = gp.read_file(output_dir / output_name, driver="GPKG")
+    # speed_data = gp.read_file(output_dir / output_name, driver="GPKG")
+    with open(output_dir / output_pickle_name, "rb") as f:
+        speed_data = p_load = pickle.load(f)
+
 
     speed_data["Ookla_Pop_at_50_10"] = (
         speed_data["Pop2016"] * speed_data["ookla_50_10_percentile"] / 100
@@ -80,7 +90,7 @@ speed_data = load_speed_data()
 pr_names = list(statcan.boundary("provinces").loc[:, "PRNAME"].unique())
 
 
-@st.experimental_memo
+@st.cache_data
 def subset_region(prname, cdname="All", ername="All"):
     pruid = (
         statcan.boundary("provinces").loc[lambda s: s.PRNAME == prname, "PRUID"].iloc[0]
