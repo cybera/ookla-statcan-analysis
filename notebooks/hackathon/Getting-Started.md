@@ -5,6 +5,10 @@ git clone https://github.com/cybera/ookla-statcan-analysis.git
 cd ookla-statcan-analysis
 ```
 
+Install necessary python libraries in requirements.txt (pip) or environment.yaml (conda). 
+Recommendation is to use either a virtual environment with pip or a conda environment (install
+miniconda).
+
 ## Download data:
 ```bash
 mkdir data/hackathon
@@ -14,7 +18,7 @@ curl -O https://swift-yyc.cloud.cybera.ca:8080/v1/AUTH_233e84cd313945c992b4b585f
 # Explore Data
 
 ## Verify Data Loads
-Check `Basic-EDA.ipynb` notebook works; 
+Check `Basic-EDA.ipynb` notebook works.
 Do some exploratory data analysis of your own.
 
 ## Review statcan definitions and ookla definitions: 
