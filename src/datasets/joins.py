@@ -142,7 +142,7 @@ def add_simple_stats(boundary_geom, tiles, geom_index):
             grps["avg_d_kbps"].quantile(0.75).rename("75p_d_kbps"),
             grps["avg_d_kbps"].max().rename("max_d_kbps"),
             grps["avg_u_kbps"].mean(),
-            grps["avg_d_kbps"].std().rename("std_u_kbps"),
+            grps["avg_u_kbps"].std().rename("std_u_kbps"),
             grps["avg_u_kbps"].min().rename("min_u_kbps"),
             grps["avg_u_kbps"].quantile(0.25).rename("25p_u_kbps"),
             grps["avg_u_kbps"].quantile(0.50).rename("50p_u_kbps"),
