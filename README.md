@@ -116,6 +116,9 @@ estimates a sequence of files needs to be run as follows:
 3. `notebooks/ArbitraryGeomPHHCalc.ipynb` -> `data/processed/geometries/hexagons_w_dissolved_smaller_popctrs.geojson`
 4. `notebooks/LastYearOrBestValue.ipynb` -> `data/processed/statistical_geometries/LastFourQuartersOrBestEstimate_On_DissolvedSmallerCitiesHexes.gpkg`
 
+Some of the derived data is slow to load, so notebooks related to generating python "pickle" files are included 
+in the `notebooks/DataProcessing` directory.
+
 (Needs to be tested, but should work start to finish from scratch; supposed to download StatCan files on its own as needed.)
 
 It is also possible to download the results for the streamlit app using the following:
